@@ -1,0 +1,87 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!--SourceLink support: https://github.com/dotnet/sourcelink -->
+  <ItemGroup>
+    <PackageReference Include="GitExtensions.Extensibility" Version="0.1.1.40" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="RestSharp" Version="106.11.7" />
+    <!--<PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>-->
+    <!--<PackageReference Include="Microsoft.SourceLink.AzureDevOpsServer.Git" Version="1.0.0" PrivateAssets="All"/>-->
+    <!--<PackageReference Include="Microsoft.SourceLink.GitLab" Version="1.0.0" PrivateAssets="All"/>-->
+    <!--<PackageReference Include="Microsoft.SourceLink.Bitbucket.Git" Version="1.0.0" PrivateAssets="All"/>-->
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GitExtensions.GitLab.Client\GitExtensions.GitLab.Client.csproj" />
+  </ItemGroup>
+
+  <!-- Reference to GitExtensions dlls. -->
+  <ItemGroup>
+    <Reference Include="GitUIPluginInterfaces">
+      <HintPath>$(GitExtensionsPath)\GitUIPluginInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="ResourceManager">
+      <HintPath>$(GitExtensionsPath)\ResourceManager.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+  <!-- Pack as .nupkg with dependency on GitExtensions.Extensibility -->
+  <PropertyGroup>
+    <NuspecFile>$(MSBuildThisFileDirectory)$(MSBuildProjectName).nuspec</NuspecFile>
+    <Authors>ahmet.urun</Authors>
+    <Company></Company>
+    <Description>GitLab plugin for Git Extensions.</Description>
+    <PackageProjectUrl>https://github.com/gitextensions/gitextensions.plugintemplate</PackageProjectUrl>
+    <PackageTags>GitExtensions</PackageTags>
+    <AssemblyName>GitExtensions.GitLab</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\Plugins\GitLab</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\Plugins</OutputPath>
+  </PropertyGroup>
+  <Target Name="SetPackageProperties" BeforeTargets="GenerateNuspec">
+    <PropertyGroup>
+      <NuspecProperties>
+        id=$(PackageId);
+        version=$(PackageVersion);
+        configuration=$(Configuration);
+        tags=$(PackageTags.Replace(';',' '));
+        projectUrl=$(PackageProjectUrl);
+        iconUrl=$(PackageIconUrl);
+        repositoryUrl=$(RepositoryUrl);
+        repositoryType=$(RepositoryType);
+        repositoryCommit=$(RepositoryCommit);
+        author=$(Authors);
+        copyright=$(Copyright);
+        description=$(Description);
+        targetDir=$(TargetDir);
+      </NuspecProperties>
+    </PropertyGroup>
+  </Target>
+
+</Project>
