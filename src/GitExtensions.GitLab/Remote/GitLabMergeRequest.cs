@@ -1,11 +1,13 @@
-﻿namespace GitExtensions.GitLab.Client.Repo
+﻿using GitExtensions.GitLab.Client.Repo;
+using GitUIPluginInterfaces.RepositoryHosts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GitExtensions.GitLab.Remote
 {
-    using System;
-    using System.Collections.Generic;
-    using Newtonsoft.Json;
-    using RestSharp;
-
-
     /*
     {
         "id": 685,
@@ -94,105 +96,53 @@
         "approvals_before_merge": null
     }
     */
-    public class MergeRequest
+    public class GitLabMergeRequest : IPullRequestInformation
     {
-        [JsonProperty("project_id")]
-        public long ProjectId { get; set; }
-
-        [JsonProperty("id")]
-        public object Id { get; set; }
-
-        [JsonProperty("iid")]
-        public long InternalId { get; set; }
-
-        [JsonProperty("title")]
-        public string Title { get; set; }
-
-        [JsonProperty("description")]
-        public string Description { get; set; }
-
-        [JsonProperty("created_at")]
-        public DateTime CreatedAt { get; set; }
-
-        [JsonProperty("updated_at")]
-        public DateTime UpdatedAt { get; set; }
-
-        [JsonProperty("web_url")]
-        public string WebUrl { get; set; }
-
-        [JsonProperty("author")]
-        public User Author { get; set; }
-
-        [JsonProperty("assignee")]
-        public User Assignee { get; set; }
-
-        [JsonProperty("assignee_id")]
-        public int AssigneeId { get; set; }
-
-        [JsonProperty("target_branch")]
-        public string TargetBranch { get; set; }
-
-        [JsonProperty("source_branch")]
-        public string SourceBranch { get; set; }
-
-        [JsonProperty("target_project_id")]
-        public int TargetProjectId { get; set; }
-
-        [JsonProperty("source_project_id")]
-        public int SourceProjectId { get; set; }
-
-        [JsonProperty("remove_source_branch")]
-        public bool RemoveSourceBranch { get; set; }
-
-        [JsonProperty("squash")]
-        public bool Squash { get; set; }
-
-        [JsonProperty("sha")]
-        public string Sha { get; set; }
-
-        [JsonProperty("merge_commit_sha")]
-        public string MergeCommitSha { get; set; }
-
-        internal IRestClient client;
-
-        /// <summary>
-        /// Retrieves all Commits associated with this merge request.
-        /// </summary>
-        /// <returns></returns>
-        public List<PullRequestCommit> GetCommits()
+        private readonly MergeRequest mergeRequest;
+        public GitLabMergeRequest(MergeRequest mergeRequest)
         {
-            // https://gitlab.com/api/v4/projects/ahmeturun%2Ftestproj/merge_requests/1/commits?private_token=<token>
-            var request = new RestRequest("projects/{projectId}/merge_requests/{mergeRequest}/commits");
-            request.AddUrlSegment("projectId", ProjectId);
-            request.AddUrlSegment("mergeRequest", InternalId);
-
-            return client.GetList<PullRequestCommit>(request);
+            this.mergeRequest = mergeRequest;
         }
 
-        public bool Open()
+        public string Title => mergeRequest.Title;
+
+        public string Body => mergeRequest.Description;
+
+        public string Owner => mergeRequest.Author.Name;
+
+        public DateTime Created => mergeRequest.CreatedAt;
+
+        public IHostedRepository BaseRepo => throw new NotImplementedException();
+
+        public IHostedRepository HeadRepo => throw new NotImplementedException();
+
+        public string BaseSha => mergeRequest.Sha;
+
+        public string HeadSha => mergeRequest.MergeCommitSha;
+
+        public string BaseRef => throw new NotImplementedException();
+
+        public string HeadRef => throw new NotImplementedException();
+
+        public string Id => mergeRequest.InternalId.ToString();
+
+        public string DetailedInfo => throw new NotImplementedException();
+
+        public string FetchBranch => throw new NotImplementedException();
+
+        public void Close()
         {
-            return UpdateState("open");
+            mergeRequest.Close();
         }
 
-        public bool Close()
+        public Task<string> GetDiffDataAsync()
         {
-            return UpdateState("closed");
+            throw new NotImplementedException();
         }
 
-        private bool UpdateState(string state)
+        public IPullRequestDiscussion GetDiscussion()
         {
-            // https://gitlab.com/api/v4/projects/ahmeturun%2Ftestproj/merge_requests/1/commits?private_token=<token>
-            ///projects/:id/merge_requests/:merge_request_iid
-            var request = new RestRequest("projects/{projectId}/merge_requests/{mergeRequestId}");
-            request.AddUrlSegment("projectId", ProjectId);
-            request.AddUrlSegment("mergeRequestId", InternalId);
-
-            request.RequestFormat = DataFormat.Json;
-            request.AddJsonBody(new
-            {
-                state_event = state
-            });
-            return client.Patch(request).StatusCode == System.Net.HttpStatusCode.OK;
+            throw new NotImplementedException();
         }
     }
 }

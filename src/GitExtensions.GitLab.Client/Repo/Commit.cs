@@ -23,7 +23,7 @@
         public List<Ref> Parents { get; private set; }
         public Commit Commit { get; private set; }
 
-        public string AuthorName { get { return Author == null ? Commit.Author.ToString() : Author.Id; } }
+        public string AuthorName { get { return Author == null ? Commit.Author.ToString() : Author.Name; } }
     }
 
     public class CommitAuthor

@@ -1,26 +1,32 @@
-﻿namespace GitExtensions.GitLab.Client.Repo
+﻿using Newtonsoft.Json;
+
+namespace GitExtensions.GitLab.Client.Repo
 {
-    /// <summary>
-    /// References a single commit.
-    /// </summary>
     public class BranchCommitRef
     {
-        /// <summary>
-        /// SHA-reference to the latest commit
-        /// </summary>
-        public string Sha { get; private set; }
+        [JsonProperty("id")]
+        public string Sha { get; set; }
+
+        [JsonProperty("short_id")]
+        public string ShordId { get; set; }
+
+        public string Title { get; set; }
+        public string Message { get; set; }
+        
+        [JsonProperty("author_name")]
+        public string AuthorName { get; set; }
+
+        [JsonProperty("author_email")]
+        public string AuthorEmail { get; set; }
+        
+        [JsonProperty("web_url")]
+        public string WebUrl { get; set; }
     }
 
     public class Branch
     {
-        /// <summary>
-        /// Name of the branch
-        /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
-        /// <summary>
-        /// Information about the commit the branch is at
-        /// </summary>
-        public BranchCommitRef Commit { get; private set; }
+        public BranchCommitRef Commit { get; set; }
     }
 }

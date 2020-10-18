@@ -1,51 +1,30 @@
 ﻿namespace GitExtensions.GitLab.Remote
 {
+    using GitCommands.Remotes;
     using System;
-    using System.Text.RegularExpressions;
-    public class GitLabRemoteParser
+
+    public class GitLabRemoteParser : RemoteParser
     {
-        private readonly string gitlabHostDomain;
+        private readonly string GitLabHostName;
 
-        public GitLabRemoteParser(string gitlabHostDomain)
+        public GitLabRemoteParser(string gitLabHostName)
         {
-            this.gitlabHostDomain = !string.IsNullOrEmpty(gitlabHostDomain)
-                ? gitlabHostDomain
-                : throw new ArgumentNullException(nameof(gitlabHostDomain));
-        }
-
-        private Match MatchRegExes(string remoteUrl, string[] regExs)
-        {
-            Match m = null;
-            foreach (var regex in regExs)
-            {
-                m = Regex.Match(remoteUrl, regex);
-                if (m.Success)
-                {
-                    break;
-                }
-            }
-
-            return m;
-        }
-
-        private string[] GetDomainSpecificRegexes()
-        {
-            var gitLabSshUrlRegex = $@"git(?:@|://){gitlabHostDomain}[:/](?<owner>[^/]+)/(?<repo>[\w_\.\-]+)\.git";
-            var gitLabHttpsUrlRegex = $@"https?://(?:[^@:]+)?(?::[^/@:]+)?@?{gitlabHostDomain}/(?<owner>[^/]+)/(?<repo>[\w_\.\-]+)(?:.git)?";
-            return new string[] { gitLabSshUrlRegex, gitLabHttpsUrlRegex };
+            GitLabHostName = !string.IsNullOrEmpty(gitLabHostName) 
+                ? gitLabHostName
+                : throw new ArgumentNullException(nameof(gitLabHostName));
         }
 
         public bool IsValidRemoteUrl(string remoteUrl)
         {
-            return TryExtractGitHubDataFromRemoteUrl(remoteUrl, out _, out _);
+            return TryExtractGitLabDataFromRemoteUrl(remoteUrl, out _, out _);
         }
 
-        public bool TryExtractGitHubDataFromRemoteUrl(string remoteUrl, out string owner, out string repository)
+        public bool TryExtractGitLabDataFromRemoteUrl(string remoteUrl, out string owner, out string repository)
         {
             owner = null;
             repository = null;
 
-            var m = MatchRegExes(remoteUrl, GetDomainSpecificRegexes());
+            var m = MatchRegExes(remoteUrl, GetGitLabRegexes());
 
             if (m == null || !m.Success)
             {
@@ -55,6 +34,14 @@
             owner = m.Groups["owner"].Value;
             repository = m.Groups["repo"].Value.Replace(".git", "");
             return true;
+        }
+
+        private string[] GetGitLabRegexes()
+        {
+            var gitLabSshUrlRegex = $@"git(?:@|://){GitLabHostName}[:/](?<owner>[^/]+)/(?<repo>[\w_\.\-]+)\.git";
+            var gitLabHttpsUrlRegex = $@"https?://(?:[^@:]+)?(?::[^/@:]+)?@?{GitLabHostName}/(?<owner>[^/]+)/(?<repo>[\w_\.\-]+)(?:.git)?";
+            return new string[] { gitLabSshUrlRegex, gitLabHttpsUrlRegex };
+
         }
     }
 }

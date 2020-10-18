@@ -1,8 +1,9 @@
-﻿using GitUIPluginInterfaces.RepositoryHosts;
-using System.Web;
-
-namespace GitExtensions.GitLab
+﻿namespace GitExtensions.GitLab
 {
+    using GitUIPluginInterfaces.RepositoryHosts;
+    using System;
+    using System.Web;
+
     internal class GitLabHostedRemote : IHostedRemote
     {
         private GitLabRepo repo;
@@ -14,19 +15,28 @@ namespace GitExtensions.GitLab
             RemoteRepositoryName = remoteRepositoryName;
             RemoteUrl = url;
             CloneProtocol = url.IsUrlUsingHttp() ? GitProtocol.Https : GitProtocol.Ssh;
+            GetHostedRepository();
         }
 
         public IHostedRepository GetHostedRepository()
         {
             if (repo == null)
             {
-                repo = new GitLabRepo(GitLabPlugin.GitLab.getRepository(HttpUtility.UrlEncode($"{Owner}/{RemoteRepositoryName}")))
+                repo = new GitLabRepo(GitLabPlugin.GitLabClient.GetRepository(HttpUtility.UrlEncode($"{Owner}/{RemoteRepositoryName}")))
                 {
                     CloneProtocol = CloneProtocol
                 };
             }
 
             return repo;
+        }
+
+        public int Id 
+        {
+            get
+            {
+                return repo?.Id ?? 0;
+            }
         }
 
         /// <summary>
@@ -36,13 +46,13 @@ namespace GitExtensions.GitLab
 
         /// <summary>
         /// Owner of the remote repository, in
-        /// git@github.com:mabako/Git.hub.git this is 'mabako'
+        /// git@gitlab.com:ahmeturun/GitLabPlugin.git this is ahmeturun
         /// </summary>
         public string Owner { get; }
 
         /// <summary>
         /// Name of the remote repository, in
-        /// git@github.com:mabako/Git.hub.git this is 'Git.hub'
+        /// git@gitlab.com:ahmeturun/GitLabPlugin.git this is 'GitLabPlugin'
         /// </summary>
         public string RemoteRepositoryName { get; }
 
@@ -52,11 +62,12 @@ namespace GitExtensions.GitLab
 
         public string Data => Owner + "/" + RemoteRepositoryName;
         public string DisplayData => Data;
-        public bool IsOwnedByMe => GitHubLoginInfo.Username == Owner;
+        public bool IsOwnedByMe => repo.CanCreateMergeRequestIn;
 
         public string GetBlameUrl(string commitHash, string fileName, int lineIndex)
         {
-            return $"{GitHub3Plugin.Instance.GitHubEndpoint}/{Data}/blame/{commitHash}/{fileName}#L{lineIndex}";
+            throw new NotImplementedException();
+            //return $"{GitHub3Plugin.Instance.GitHubEndpoint}/{Data}/blame/{commitHash}/{fileName}#L{lineIndex}";
         }
     }
 }

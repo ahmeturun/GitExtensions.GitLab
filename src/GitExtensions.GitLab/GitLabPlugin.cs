@@ -8,6 +8,11 @@ using GitUIPluginInterfaces.RepositoryHosts;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using GitUI;
+using GitExtUtils;
+using GitCommands;
+using GitCommands.Config;
+using GitExtensions.GitLab.Remote;
 
 namespace GitExtensions.GitLab
 {
@@ -18,28 +23,33 @@ namespace GitExtensions.GitLab
     [Export(typeof(IGitPlugin))]
     public class GitLabPlugin : GitPluginBase, IRepositoryHostPlugin
     {
+        private static readonly int FirstHotkeyCommandIdentifier = 10000; // Arbitrary choosen. GE by default starts at 9000 for it's own scripts.
+
         private readonly CredentialsSetting credentialsSettings;
         private readonly Func<IGitModule> getModule;
         public readonly StringSetting OAuthToken = new StringSetting("OAuth Token", "");
         public readonly StringSetting GitLabHost = new StringSetting(
             "GitLab (Enterprise) hostname", 
             "https://gitlab.com");
+        private readonly ArgumentString cmdInfo = new GitArgumentBuilder("status");
+        private RepoType? repoType = null;
 
         private IGitUICommands currentGitUiCommands;
 
-        public string GitLabApiEndpoint => $"{GitLabHost.ValueOrDefault(Settings).Trim('/')}/api/v4/";
+        public string GitLabHostParsed => $"https://{GitLabHost.ValueOrDefault(Settings).Replace("https://", "").Replace("http://", "").Trim('/')}";
+        public string GitLabApiEndpoint => $"{GitLabHostParsed}/api/v4/";
 
         private IGitModule gitModule;
 
         internal static GitLabPlugin Instance;
         internal static Client.Client gitLab;
-        internal static Client.Client GitLab => gitLab ?? (gitLab = new Client.Client(
-            Instance.GitLabHost.ValueOrDefault(Instance.Settings).Trim('/'),
+        internal static Client.Client GitLabClient => gitLab ?? (gitLab = new Client.Client(
+            Instance.GitLabHostParsed,
             Instance.OAuthToken.ValueOrDefault(Instance.Settings)));
 
-        public bool ConfigurationOk => throw new NotImplementedException();
+        public bool ConfigurationOk => !string.IsNullOrEmpty(OAuthToken.ValueOrDefault(Settings));
 
-        public string OwnerLogin => throw new NotImplementedException();
+        public string OwnerLogin => GitLabClient.GetCurrentUser()?.Username;
 
         public GitLabPlugin() : base(true)
         {
@@ -67,23 +77,30 @@ namespace GitExtensions.GitLab
         /// </summary>
         public override void Register(IGitUICommands gitUiCommands)
         {
-            // Put your initialization logic here
-            base.Register(gitUiCommands);
             currentGitUiCommands = gitUiCommands;
-            gitModule = gitUiCommands.GitModule;
-            // TODO: open a form to set the personal access token if it's not set
+            if (IsGitLabRepo(gitUiCommands))
+            {
+                base.Register(gitUiCommands);
+
+                GitLabPluginScriptManager.AddNew("Create Merge Request", string.Empty, string.Empty, command: $"plugin:{GitLabCreateMergeRequest.GitLabCreateMRDescription}");
+                GitLabPluginScriptManager.AddNew("Manage Merge Requests", string.Empty, string.Empty, command: $"plugin:{GitLabManagePullRequests.GitLabManageMRDescription}");
+                gitModule = gitUiCommands.GitModule;
+                ForceRefreshGE(gitUiCommands);
+            }
+			else
+			{
+                GitLabPluginScriptManager.RemoveAll();
+            }
         }
 
-
-        /// <summary>
-        /// Is called when the plugin is unloaded. This happens every time when a repository is closed through one of the following events:
-        ///   1. opening another repository
-        ///   2. returning to Dashboard (Repository > Close (go to Dashboard))
-        ///   3. closing Git Extensions
-        /// </summary>
         public override void Unregister(IGitUICommands gitUiCommands)
         {
-            // Put your cleaning logic here
+            if (IsGitLabRepo(gitUiCommands))
+            {
+                GitLabPluginScriptManager.RemoveAll();
+            }
+
+            repoType = null;
         }
 
         ///// <summary>
@@ -113,9 +130,19 @@ namespace GitExtensions.GitLab
         /// </returns>
         public override bool Execute(GitUIEventArgs gitUIEventArgs)
         {
+            /*
+             * open new form for below actions:
+             *  Create Pull request
+             */
+
             // Put your action logic here
             MessageBox.Show(gitUIEventArgs.OwnerForm, "Hello from the Plugin Template.", "Git Extensions");
             return false;
+        }
+
+        private void ForceRefreshGE(IGitUICommands gitUiCommands)
+        {
+            gitUiCommands.RepoChangedNotifier.Notify();
         }
 
         private IGitModule GetModule()
@@ -129,6 +156,14 @@ namespace GitExtensions.GitLab
 
             return module;
         }
+
+        public override IEnumerable<ISetting> GetSettings()
+        {
+            yield return OAuthToken;
+            yield return GitLabHost;
+        }
+
+        #region IRepositoryHostPlugin definitions
 
         public IReadOnlyList<IHostedRepository> SearchForRepository(string search)
         {
@@ -157,9 +192,33 @@ namespace GitExtensions.GitLab
 
         public bool GitModuleIsRelevantToMe()
         {
+            return GetHostedRemotesForModule().Count > 0;
+        }
+
+        public Task<string> AddUpstreamRemoteAsync()
+        {
             throw new NotImplementedException();
         }
 
+        #endregion
+
+
+        private bool IsGitLabRepo(IGitUICommands gitUiCommands)
+        {
+            if (repoType == null)
+            {
+                ExecutionResult result = gitUiCommands.GitModule.GitExecutable.Execute(cmdInfo);
+                repoType = (result.ExitCode == 0)
+                    ? RepoType.git
+                    : RepoType.Unknown;
+            }
+
+            return repoType == RepoType.git && GetHostedRemotesForModule().Count() > 0;
+        }
+
+        /// <summary>
+        /// Returns all relevant github-remotes for the current working directory
+        /// </summary>
         public IReadOnlyList<IHostedRemote> GetHostedRemotesForModule()
         {
             if (currentGitUiCommands?.GitModule == null)
@@ -173,18 +232,21 @@ namespace GitExtensions.GitLab
             IEnumerable<IHostedRemote> Remotes()
             {
                 var set = new HashSet<IHostedRemote>();
-
+                var gitlabDomain = GitLabHost.ValueOrDefault(Settings)
+                    .Replace("https://", "")
+                    .Replace("http://", "")
+                    .Trim('/');
                 foreach (string remote in gitModule.GetRemoteNames())
                 {
-                    var url = gitModule.GetSetting(string.Format(StringKeySettings.RemoteUrl, remote));
+                    var url = gitModule.GetSetting(string.Format(SettingKeyString.RemoteUrl, remote));
 
                     if (string.IsNullOrEmpty(url))
                     {
                         continue;
                     }
-                    var gitLabHostUri = new Uri(GitLabHost.ValueOrDefault(Settings));
-                    if (new Remote.GitLabRemoteParser(gitLabHostUri.Host)
-                            .TryExtractGitHubDataFromRemoteUrl(url, out var owner, out var repository))
+
+                    if (new GitLabRemoteParser(gitlabDomain)
+                            .TryExtractGitLabDataFromRemoteUrl(url, out var owner, out var repository))
                     {
                         var hostedRemote = new GitLabHostedRemote(remote, owner, repository, url);
 
@@ -195,17 +257,6 @@ namespace GitExtensions.GitLab
                     }
                 }
             }
-        }
-
-        public Task<string> AddUpstreamRemoteAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IEnumerable<ISetting> GetSettings()
-        {
-            yield return OAuthToken;
-            yield return GitLabHost;
         }
     }
 }

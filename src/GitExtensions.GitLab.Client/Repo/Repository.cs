@@ -16,6 +16,7 @@
         
         [JsonProperty("default_branch")]
         public string DefaultBranch { get; set; }
+        [JsonProperty("namespace")]
         public User Owner { get; set; }
 
         /// <summary>
@@ -23,16 +24,19 @@
         /// git://github.com/{user}/{repo}.git
         /// </summary>
         [JsonProperty("http_url_to_repo")]
-        public string GitUrl { get; internal set; }
+        public string GitUrl { get; set; }
 
         /// <summary>
         /// Read/Write clone url via SSH
         /// git@github.com/{user}/{repo.git}
         /// </summary>
         [JsonProperty("ssh_url_to_repo")]
-        public string SshUrl { get; internal set; }
+        public string SshUrl { get; set; }
 
-        internal RestClient client;
+        [JsonProperty("can_create_merge_request_in")]
+        public bool CanCreateMergeRequestIn { get; set; }
+
+        internal IRestClient client;
 
         /// <summary>
         /// Forks this repository into your own account.
@@ -40,11 +44,9 @@
         /// <returns></returns>
         public Repository CreateFork(string forkProjectPath, string forkProjectName)
         {
-            // https://gitlab.com/api/v4/projects/ahmeturun%2Ftestproj/merge_requests/1/commits?private_token=<token>
             // /projects/:id/fork
-            RestRequest request = new AuthenticatedRestRequest("/repos/{user}/{repo}/forks");
-            request.AddUrlSegment("user", Owner.Id);
-            request.AddUrlSegment("repo", Name);
+            RestRequest request = new RestRequest("/repos/{projectPath}/forks");
+            request.AddUrlSegment("projectPath", Id);
             request.AddJsonBody(new
             {
                 path = forkProjectPath,
@@ -65,9 +67,8 @@
         {
             // /projects/:id/repository/branches
             // https://gitlab.com/api/v4/projects/ahmeturun%2Ftestproj/merge_requests/1/commits?private_token=<token>
-            RestRequest request = new AuthenticatedRestRequest("/projects/{user}{repo}/repository/branches");
-            request.AddUrlSegment("user", HttpUtility.UrlEncode(Owner.Id));
-            request.AddUrlSegment("repo", HttpUtility.UrlEncode(Name));
+            RestRequest request = new RestRequest("/api/v4/projects/{projectPath}/repository/branches");
+            request.AddUrlSegment("projectPath", Id);
 
             return client.GetList<Branch>(request);
         }
@@ -76,33 +77,19 @@
         /// Retrieves the name of the default branch
         /// </summary>
         /// <returns>The name of the default branch</returns>
-        public string GetDefaultBranch()
-        {
-            RestRequest request = new AuthenticatedRestRequest("/repos/{user}/{repo}");
-            request.AddUrlSegment("user", Owner.Id);
-            request.AddUrlSegment("repo", Name);
-
-            var repo = client.Get<Repository>(request).Data;
-
-            if (repo == null)
-            {
-                return null;
-            }
-
-            return repo.DefaultBranch;
-        }
+        public string GetDefaultBranch() => DefaultBranch;
 
         /// <summary>
         /// Lists all open pull requests
         /// </summary>
         /// <param name="userId"></param>
         /// <returns>list of all open pull requests assigned to given <paramref name="userId"/></returns>
-        public IList<MergeRequest> GetMergeRequests(int userId)
+        public IList<MergeRequest> GetMergeRequests()
         {
-            var request = new AuthenticatedRestRequest("/projects/{user}{repo}/merge_requests?state=opened&assignee_id={userId}");
-            request.AddUrlSegment("user", HttpUtility.UrlEncode(Owner.Id));
-            request.AddUrlSegment("repo", HttpUtility.UrlEncode(Name));
-            request.AddUrlSegment("userId", userId);
+            var request = new RestRequest("/projects/{projectPath}/merge_requests?state=opened");
+            //var request = new RestRequest("/projects/{user}{repo}/merge_requests?state=opened&assignee_id={userId}");
+            request.AddUrlSegment("projectPath", Id);
+            //request.AddUrlSegment("userId", userId);
 
             var list = client.GetList<MergeRequest>(request);
             if (list == null)
@@ -119,9 +106,8 @@
         /// <returns>the single pull request</returns>
         public MergeRequest GetMergeRequest(int id)
         {
-            var request = new AuthenticatedRestRequest("/projects/{user}{repo}/merge_requests/{merge_request_id}");
-            request.AddUrlSegment("user", Owner.Id);
-            request.AddUrlSegment("repo", Name);
+            var request = new RestRequest("/projects/{projectPath}/merge_requests/{merge_request_id}");
+            request.AddUrlSegment("projectPath", Id);
             request.AddUrlSegment("merge_request_id", id.ToString());
 
             var pullrequest = client.Get<MergeRequest>(request).Data;
@@ -140,9 +126,8 @@
             string title,
             string description)
         {
-            var request = new AuthenticatedRestRequest("/projects/{name}{repo}/merge_requests");
-            request.AddUrlSegment("name", HttpUtility.UrlEncode(Owner.Id));
-            request.AddUrlSegment("repo", HttpUtility.UrlEncode(Name));
+            var request = new RestRequest("/projects/{projectPath}/merge_requests");
+            request.AddUrlSegment("projectPath", Id);
 
             request.RequestFormat = DataFormat.Json;
             request.AddJsonBody(new
@@ -175,7 +160,7 @@
 
         public override string ToString()
         {
-            return Owner.Id + "/" + Name;
+            return Owner.Name + "/" + Name;
         }
     }
 }

@@ -1,82 +1,130 @@
 ﻿namespace GitExtensions.GitLab.Client
 {
-    using System;
-    using System.Net;
-    using GitExtensions.GitLab.Client.Repo;
-    using RestSharp;
-    
-    public class Client
-    {
-        private const string AuthenticationSchema = "Bearer";
-        private readonly RestClient client;
-        private readonly string gitLabDomain = "https://gitlab.net";
+	using System;
+	using System.Collections.Generic;
+	using System.Net;
+	using System.Net.Http;
+	using GitExtensions.GitLab.Client.Repo;
+	using RestSharp;
 
-        public Client()
-        {
-            client = new RestClient(gitLabDomain);
-        }
 
-        public Client(string gitLabDomain, string oAuthToken)
-        {
-            this.gitLabDomain = !string.IsNullOrEmpty(gitLabDomain)
-                ? gitLabDomain
-                : throw new ArgumentNullException(nameof(gitLabDomain));
-            client = new RestClient(this.gitLabDomain);
-            client.AddDefaultHeader(HttpRequestHeader.Authorization.ToString(), $"{AuthenticationSchema} {oAuthToken}");
-        }
+	public class Client
+	{
+		private const string AuthenticationSchema = "Bearer";
+		private readonly HttpClient httpClient;
+		private readonly IRestClient client;
+		private readonly string gitLabDomain = "https://gitlab.net";
 
-        /// <summary>
-        /// Retrieves the current user.
-        /// Requires to be logged in (OAuth).
-        /// </summary>
-        /// <returns>current user</returns>
-        public User getCurrentUser()
-        {
-            var request = new RestRequest("/user");
+		public Client(string gitLabDomain, string oAuthToken)
+		{
+			this.gitLabDomain = !string.IsNullOrEmpty(gitLabDomain)
+				? gitLabDomain
+				: throw new ArgumentNullException(nameof(gitLabDomain));
+			client = new RestClient(this.gitLabDomain).UseSerializer(() => new JsonNetSerializer());
+			client.AddDefaultHeader(HttpRequestHeader.Authorization.ToString(), $"{AuthenticationSchema} {oAuthToken}");
+		}
 
-            var user = DoRequest<User>(request, false);
+		/// <summary>
+		/// Retrieves the current user.
+		/// Requires to be logged in (OAuth).
+		/// </summary>
+		/// <returns>current user</returns>
+		public User GetCurrentUser()
+		{
+			var request = new RestRequest("/api/v4/user");
 
-            return user;
-        }
+			var user = DoRequest<User>(request, false);
 
-        /// <summary>
-        /// Fetches a single repository from github.com/username/repositoryName.
-        /// </summary>
-        /// <param name="repositoryName">name of the repository</param>
-        /// <returns>fetched repository</returns>
-        public Repository getRepository(string repositoryName)
-        {
-            var request = new RestRequest("/projects/{repo}")
-                .AddUrlSegment("repo", repositoryName);
+			return user;
+		}
 
-            var repo = DoRequest<Repository>(request);
-            if (repo == null)
-                return null;
+		/// <summary>
+		/// Fetches a single repository from github.com/username/repositoryName.
+		/// </summary>
+		/// <param name="repositoryName">name of the repository</param>
+		/// <returns>fetched repository</returns>
+		public Repository GetRepository(string repositoryName)
+		{
+			var request = new RestRequest("/api/v4/projects/{repo}")
+				.AddUrlSegment("repo", repositoryName);
 
-            repo.client = client;
-            return repo;
-        }
+			var repo = DoRequest<Repository>(request);
+			if (repo == null)
+				return null;
 
-        private T DoRequest<T>(IRestRequest request, bool throwOnError = true) where T : new()
-        {
-            var response = client.Get<T>(request);
-            if (response.IsSuccessful)
-            {
-                return response.Data;
-            }
+			repo.client = client;
+			return repo;
+		}
 
-            if (!throwOnError)
-            {
-                return default;
-            }
+		public IList<User> GetUsers(string searchKey = "")
+		{
+			var searchFilter = !string.IsNullOrEmpty(searchKey)
+				? $"?search={searchKey}"
+				: string.Empty;
+			var request = new RestRequest($"/api/v4/users{searchFilter}");
+			var users = DoRequest<List<User>>(request);
+			return users;
+		}
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                throw new UnauthorizedAccessException("The GitHub authentication token provided is not valid.");
-            }
+		public MergeRequest CreateMergeRequest(MergeRequest mergeRequest)
+		{
+			var request = new RestRequest($"/api/v4/projects/{mergeRequest.Id}/merge_requests")
+				.AddJsonBody(mergeRequest);
+			var createdMergeRequest = PostRequest<MergeRequest>(request);
+			return createdMergeRequest;
+		}
 
-            throw new Exception(response.StatusDescription);
-        }
+		private T DoRequest<T>(IRestRequest request, bool throwOnError = true) where T : new()
+		{
+			var response = client.Get<T>(request);
+			if (response.IsSuccessful)
+			{
+				return response.Data;
+			}
 
-    }
+			if (!throwOnError)
+			{
+				return default;
+			}
+
+			if (response.StatusCode == HttpStatusCode.Unauthorized)
+			{
+				throw new UnauthorizedAccessException("The GitLab authentication token provided is not valid.");
+			}
+
+			if (response.StatusCode == HttpStatusCode.NotFound)
+			{
+				return default;
+			}
+
+			throw new Exception($"{response.StatusDescription}\n{response.Content}");
+		}
+
+		private T PostRequest<T>(IRestRequest request, bool throwOnError = true) where T : new()
+		{
+			var response = client.Post<T>(request);
+			if (response.IsSuccessful)
+			{
+				return response.Data;
+			}
+
+			if (!throwOnError)
+			{
+				return default;
+			}
+
+			if (response.StatusCode == HttpStatusCode.Unauthorized)
+			{
+				throw new UnauthorizedAccessException("The GitLab authentication token provided is not valid.");
+			}
+
+			if (response.StatusCode == HttpStatusCode.NotFound)
+			{
+				return default;
+			}
+
+			throw new Exception($"{response.StatusDescription}\n{response.Content}");
+		}
+
+	}
 }

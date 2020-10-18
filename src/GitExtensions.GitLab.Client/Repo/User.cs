@@ -7,7 +7,7 @@ namespace GitExtensions.GitLab.Client.Repo
         /// <summary>
         /// The GitLab username
         /// </summary>
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Username { get; set; }
         public string State { get; set; }
@@ -17,7 +17,6 @@ namespace GitExtensions.GitLab.Client.Repo
 
         [JsonProperty("web_url")]
         public string WebUrl { get; set; }
-        public string State { get; set; }
         public User()
         {
         }
@@ -34,7 +33,7 @@ namespace GitExtensions.GitLab.Client.Repo
 
         public override string ToString()
         {
-            return Id;
+            return Name;
         }
 
     }
