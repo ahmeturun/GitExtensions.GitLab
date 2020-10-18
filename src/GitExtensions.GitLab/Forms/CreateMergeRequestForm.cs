@@ -14,6 +14,7 @@ using System.Threading;
 using GitExtensions.GitLab.Client.Repo;
 using System.Web;
 using GitUI.HelperDialogs;
+using GitUI.UserControls;
 
 namespace GitExtensions.GitLab.Forms
 {
@@ -299,12 +300,45 @@ namespace GitExtensions.GitLab.Forms
 		{
 			mergeRequestCreateLoading.Visible = false;
 			mergeRequestCreateLoading.IsAnimating = false;
-			FormStatus.ShowErrorDialog(
-				this, 
-				mergeRequestError.Text, 
-				errorDetails.Text, 
+			ShowErrorDialog(
+				this,
+				mergeRequestError.Text,
+				errorDetails.Text,
 				e.Exception.Message);
 			createMergeRequestBtn.Enabled = true;
+		}
+
+		public static void ShowErrorDialog(IWin32Window owner, string text, params string[] output)
+		{
+			var editboxBasedConsoleOutputControl = new EditboxBasedConsoleOutputControl();
+			if (output?.Length > 0)
+			{
+				foreach (string line in output)
+				{
+					AppendMessage(editboxBasedConsoleOutputControl, line);
+				}
+			}
+
+			using (var form = new FormStatus(editboxBasedConsoleOutputControl, useDialogSettings: true))
+			{
+				form.Text = text;
+
+				//form.ProgressBar.Visible = false;
+				//form.KeepDialogOpen.Visible = false;
+				//form.Abort.Visible = false;
+
+				form.StartPosition = FormStartPosition.CenterParent;
+
+				// We know that an operation (whatever it may have been) has failed, so set the error state.
+				form.Done(false);
+
+				form.ShowDialog(owner);
+			}
+		}
+
+		private static void AppendMessage(ConsoleOutputControl consoleOutput, string text)
+		{
+			consoleOutput.AppendMessageFreeThreaded(text);
 		}
 	}
 }
