@@ -41,24 +41,24 @@
   <!-- Reference to GitExtensions dlls. -->
   <ItemGroup>
     <Reference Include="GitCommands">
-      <!--<HintPath>$(GitExtensionsPath)\GitCommands.dll</HintPath>-->
-      <HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\GitCommands.dll</HintPath>
+      <HintPath>$(GitExtensionsPath)\GitCommands.dll</HintPath>
+      <!--<HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\GitCommands.dll</HintPath>-->
     </Reference>
     <Reference Include="GitExtUtils">
-      <!--<HintPath>$(GitExtensionsPath)\GitExtUtils.dll</HintPath>-->
-      <HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\GitExtUtils.dll</HintPath>
+      <HintPath>$(GitExtensionsPath)\GitExtUtils.dll</HintPath>
+      <!--<HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\GitExtUtils.dll</HintPath>-->
     </Reference>
     <Reference Include="GitUI">
-      <!--<HintPath>$(GitExtensionsPath)\GitUI.dll</HintPath>-->
-      <HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\GitUI.dll</HintPath>
+      <HintPath>$(GitExtensionsPath)\GitUI.dll</HintPath>
+      <!--<HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\GitUI.dll</HintPath>-->
     </Reference>
     <Reference Include="GitUIPluginInterfaces">
-      <!--<HintPath>$(GitExtensionsPath)\GitUIPluginInterfaces.dll</HintPath>-->
-      <HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\GitUIPluginInterfaces.dll</HintPath>
+      <HintPath>$(GitExtensionsPath)\GitUIPluginInterfaces.dll</HintPath>
+      <!--<HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\GitUIPluginInterfaces.dll</HintPath>-->
     </Reference>
     <Reference Include="ResourceManager">
-      <!--<HintPath>$(GitExtensionsPath)\ResourceManager.dll</HintPath>-->
-      <HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\ResourceManager.dll</HintPath>
+      <HintPath>$(GitExtensionsPath)\ResourceManager.dll</HintPath>
+      <!--<HintPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\ResourceManager.dll</HintPath>-->
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.DirectoryServices" />
@@ -75,12 +75,12 @@
     <PackageTags>GitExtensions</PackageTags>
     <AssemblyName>GitExtensions.GitLab</AssemblyName>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <!--<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\Plugins\GitLab</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>F:\git\gitextensions\artifacts\bin\GitExtensions\Debug\net461\Plugins</OutputPath>
-  </PropertyGroup>
+  </PropertyGroup>-->
   <Target Name="SetPackageProperties" BeforeTargets="GenerateNuspec">
     <PropertyGroup>
       <NuspecProperties>
