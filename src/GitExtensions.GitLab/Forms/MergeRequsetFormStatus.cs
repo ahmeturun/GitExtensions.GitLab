@@ -7,14 +7,14 @@ using System.Windows.Forms;
 
 namespace GitExtensions.GitLab.Forms
 {
-	public partial class MergeRequsetFormStatus : GitExtensionsDialog
+	public partial class MergeRequsetFormStatus : GitModuleForm
 	{
 		private readonly string mergeRequestLink;
 
 		[Obsolete]
 		public MergeRequsetFormStatus() { }
 
-		public MergeRequsetFormStatus(string text, string mergeRequestLink, params string[] output) : base(null, true)
+		public MergeRequsetFormStatus(string text, string mergeRequestLink, params string[] output) : base(null)
 		{
 			this.mergeRequestLink = mergeRequestLink;
 			StartPosition = FormStartPosition.CenterParent;
@@ -28,14 +28,14 @@ namespace GitExtensions.GitLab.Forms
 				Dock = DockStyle.Top,
 				Size = new Size(50,50)
 			};
-			pnlOutput.Controls.Add(consoleOutputControl);
+			MainPanel.Controls.Add(consoleOutputControl);
 			var mergeRequestUrlLabel = new LinkLabel
 			{
 				Text = "Open merge request in browser"
 			};
 			mergeRequestUrlLabel.Click += MergeRequestUrlLabel_Click;
 			mergeRequestUrlLabel.Dock = DockStyle.Bottom;
-			pnlOutput.Controls.Add(mergeRequestUrlLabel);
+			MainPanel.Controls.Add(mergeRequestUrlLabel);
 			Text = text;
 			if (output?.Length > 0)
 			{

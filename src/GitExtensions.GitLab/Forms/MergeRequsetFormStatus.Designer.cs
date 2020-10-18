@@ -29,13 +29,11 @@
 		private void InitializeComponent()
 		{
 			this.Ok = new System.Windows.Forms.Button();
-			this.pnlOutput = new System.Windows.Forms.Panel();
 			this.MainPanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// MainPanel
 			// 
-			this.MainPanel.Controls.Add(this.pnlOutput);
 			this.MainPanel.Controls.Add(this.Ok);
 			this.MainPanel.Padding = new System.Windows.Forms.Padding(0);
 			this.MainPanel.Size = new System.Drawing.Size(549, 43);
@@ -51,14 +49,19 @@
 			this.Ok.UseVisualStyleBackColor = true;
 			this.Ok.Click += new System.EventHandler(this.Ok_Click);
 			// 
-			// pnlOutput
+			// ControlsPanel
 			// 
-			this.pnlOutput.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.pnlOutput.Location = new System.Drawing.Point(0, 0);
-			this.pnlOutput.Name = "pnlOutput";
-			this.pnlOutput.Padding = new System.Windows.Forms.Padding(27);
-			this.pnlOutput.Size = new System.Drawing.Size(549, 43);
-			this.pnlOutput.TabIndex = 0;
+			this.ControlsPanel.AutoSize = true;
+			this.ControlsPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			this.ControlsPanel.BackColor = System.Drawing.SystemColors.ControlLight;
+			this.ControlsPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.ControlsPanel.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
+			this.ControlsPanel.Location = new System.Drawing.Point(0, 292);
+			this.ControlsPanel.MinimumSize = new System.Drawing.Size(0, 45);
+			this.ControlsPanel.Name = "ControlsPanel";
+			this.ControlsPanel.Padding = new System.Windows.Forms.Padding(8);
+			this.ControlsPanel.Size = new System.Drawing.Size(553, 45);
+			this.ControlsPanel.TabIndex = 0;
 			// 
 			// MergeRequsetFormStatus
 			// 
@@ -80,6 +83,7 @@
 
 		#endregion
 		protected System.Windows.Forms.Button Ok;
-		protected System.Windows.Forms.Panel pnlOutput;
+		protected internal System.Windows.Forms.Panel MainPanel;
+		protected internal System.Windows.Forms.FlowLayoutPanel ControlsPanel;
 	}
 }
