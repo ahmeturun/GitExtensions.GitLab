@@ -25,7 +25,7 @@ image:
 
 # scripts to run before build
 before_build:
-- ps: nuget restore .\GitExtensions.PluginTemplate.sln
+- ps: nuget restore .\GitExtensions.GitLab.sln
 
 build:
   # enable MSBuild parallel builds
