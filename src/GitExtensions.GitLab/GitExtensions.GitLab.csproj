@@ -22,16 +22,13 @@
   <!--SourceLink support: https://github.com/dotnet/sourcelink -->
   <ItemGroup>
     <PackageReference Include="GitExtensions.Extensibility" Version="0.1.1.40" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Threading" Version="16.5.132" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="RestSharp" Version="106.11.7" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GitExtensions.GitLab.Client\GitExtensions.GitLab.Client.csproj" />
+    <ProjectReference Include="..\GitExtensions.GitLab.Client\GitExtensions.GitLab.Client.csproj">
+    </ProjectReference>
   </ItemGroup>
 
   <!-- Reference to GitExtensions dlls. -->

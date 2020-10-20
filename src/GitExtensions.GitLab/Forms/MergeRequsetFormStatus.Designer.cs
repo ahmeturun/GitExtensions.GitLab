@@ -28,8 +28,9 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.ControlsPanel = new System.Windows.Forms.FlowLayoutPanel();
 			this.Ok = new System.Windows.Forms.Button();
-			this.MainPanel.SuspendLayout();
+			this.MainPanel = new System.Windows.Forms.Panel();
 			this.SuspendLayout();
 			// 
 			// MainPanel

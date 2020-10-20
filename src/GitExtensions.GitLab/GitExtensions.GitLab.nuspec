@@ -14,5 +14,9 @@
   <files>
     <file src="$targetDir$$id$.dll" target="/lib" />
     <file src="$targetDir$$id$.pdb" target="/lib" />
+    <file src="$targetDir$GitExtensions.GitLab.Client.dll" target="/lib" />
+    <file src="$targetDir$GitExtensions.GitLab.Client.pdb" target="/lib" />
+    <file src="$targetDir$Newtonsoft.Json.dll" target="/lib" />
+    <file src="$targetDir$RestSharp.dll" target="/lib" />
   </files>
 </package>

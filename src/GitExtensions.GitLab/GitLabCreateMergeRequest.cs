@@ -21,18 +21,15 @@
 		}
 		public override bool Execute(GitUIEventArgs args)
 		{
+			System.Diagnostics.Debugger.Launch();
 			if (!TryGetRepositoryHost(args.GitModule, args.OwnerForm, out var repoHostPlugin))
 			{
 				return false;
 			}
-
-			var formBrowse = args.OwnerForm as GitUI.CommandsDialogs.FormBrowse;
-			var revisionGridControl = formBrowse?.RevisionGridControl;
-
 			var mergeRequestForm = new CreateMergeRequestForm(
 				args.GitModule, 
-				repoHostPlugin, 
-				revisionGridControl);
+				repoHostPlugin,
+				args.OwnerForm as GitModuleForm);
 			mergeRequestForm.ShowDialog();
 			return false;
 		}

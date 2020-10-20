@@ -14,11 +14,11 @@ namespace GitExtensions.GitLab.Forms
 		[Obsolete]
 		public MergeRequsetFormStatus() { }
 
-		public MergeRequsetFormStatus(string text, string mergeRequestLink, params string[] output) : base(null)
+		public MergeRequsetFormStatus(string text, string mergeRequestLink, Bitmap dialogIcon, params string[] output) : base(null)
 		{
 			this.mergeRequestLink = mergeRequestLink;
 			StartPosition = FormStartPosition.CenterParent;
-			SetIcon(Images.StatusBadgeSuccess);
+			SetIcon(dialogIcon);
 			InitializeComponent();
 			Ok.Enabled = true;
 			Ok.Focus();
@@ -29,13 +29,16 @@ namespace GitExtensions.GitLab.Forms
 				Size = new Size(50,50)
 			};
 			MainPanel.Controls.Add(consoleOutputControl);
-			var mergeRequestUrlLabel = new LinkLabel
+			if (!string.IsNullOrEmpty(mergeRequestLink))
 			{
-				Text = "Open merge request in browser"
-			};
-			mergeRequestUrlLabel.Click += MergeRequestUrlLabel_Click;
-			mergeRequestUrlLabel.Dock = DockStyle.Bottom;
-			MainPanel.Controls.Add(mergeRequestUrlLabel);
+				var mergeRequestUrlLabel = new LinkLabel
+				{
+					Text = "Open merge request in browser"
+				};
+				mergeRequestUrlLabel.Click += MergeRequestUrlLabel_Click;
+				mergeRequestUrlLabel.Dock = DockStyle.Bottom;
+				MainPanel.Controls.Add(mergeRequestUrlLabel);
+			}
 			Text = text;
 			if (output?.Length > 0)
 			{
