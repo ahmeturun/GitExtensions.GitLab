@@ -1,52 +1,65 @@
 ﻿namespace GitExtensions.GitLab
 {
-    using System.ComponentModel;
-    
-    public class GitLabPluginScriptManager
-    {
-        private static BindingList<GitUI.Script.ScriptInfo> GitExtScriptList = new BindingList<GitUI.Script.ScriptInfo> { };
-        private static readonly BindingList<GitUI.Script.ScriptInfo> GitLabPluginScriptList = new BindingList<GitUI.Script.ScriptInfo> { };
-        static readonly private int FirstHotkeyCommandIdentifier = 10000; // Arbitrary choosen. GE by default starts at 9000 for it's own scripts.
-        
-        public static void AddNew(string name,
-                                  string arguments,
-                                  string icon,
-                                  bool enabled = true,
-                                  string command = "plugin:",
-                                  bool addToRevisionGridContextMenu = true,
-                                  GitUI.Script.ScriptEvent onEvent = GitUI.Script.ScriptEvent.ShowInUserMenuBar,
-                                  bool askConfirmation = false,
-                                  bool runInBackground = false,
-                                  bool isPowerShell = false)
-        {
-            GitExtScriptList = GitUI.Script.ScriptManager.GetScripts();
+	using System.Linq;
 
-            GitUI.Script.ScriptInfo newScript = GitExtScriptList.AddNew();
-            newScript.Enabled = enabled;
-            newScript.Name = name;
-            newScript.Command = command;
-            newScript.Arguments = arguments;
-            newScript.AddToRevisionGridContextMenu = addToRevisionGridContextMenu;
-            newScript.OnEvent = onEvent;
-            newScript.AskConfirmation = askConfirmation;
-            newScript.RunInBackground = runInBackground;
-            newScript.IsPowerShell = isPowerShell;
-            newScript.HotkeyCommandIdentifier = FirstHotkeyCommandIdentifier + GitExtScriptList.Count;
-            newScript.Icon = icon;
+	public class GitLabPluginScriptManager
+	{
+		private static readonly GitLabPluginScript CreateMergeRequestPluginScript =
+			new GitLabPluginScript("Create Merge Request", $"plugin:{GitLabCreateMergeRequest.GitLabCreateMRDescription}");
+		private static readonly GitLabPluginScript CreateManageMergeRequestPluginScript =
+			new GitLabPluginScript("Manage Merge Requests", $"plugin:{GitLabManagePullRequests.GitLabManageMRDescription}");
 
-            GitLabPluginScriptList.Add(newScript);
-        }
+		static readonly private int FirstHotkeyCommandIdentifier = 10000; // Arbitrary choosen. GE by default starts at 9000 for it's own scripts.
 
-        public static void RemoveAll()
-        {
-            GitExtScriptList = GitUI.Script.ScriptManager.GetScripts();
+		public static void Initialize()
+		{
+			Clean();
+			AddNew(CreateMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateMergeRequestPluginScript.Command);
+			AddNew(CreateManageMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateManageMergeRequestPluginScript.Command);
+		}
 
-            foreach (var script in GitLabPluginScriptList)
-            {
-                GitExtScriptList.Remove(script);
-            }
+		public static void Clean()
+		{
+			Remove(CreateMergeRequestPluginScript);
+			Remove(CreateManageMergeRequestPluginScript);
+		}
 
-            GitLabPluginScriptList.Clear();
-        }
-    }
+		private static void Remove(GitLabPluginScript gitLabPluginScript)
+		{
+			var gitExtScriptList = GitUI.Script.ScriptManager.GetScripts();
+			var registeredPluginScript = gitExtScriptList.FirstOrDefault(item => item.Name == gitLabPluginScript.Name && item.Command == gitLabPluginScript.Command);
+			if(registeredPluginScript != null)
+			{
+				gitExtScriptList.Remove(registeredPluginScript);
+			}
+		}
+
+		private static void AddNew(
+			string name,
+			string arguments,
+			string icon,
+			bool enabled = true,
+			string command = "plugin:",
+			bool addToRevisionGridContextMenu = true,
+			GitUI.Script.ScriptEvent onEvent = GitUI.Script.ScriptEvent.ShowInUserMenuBar,
+			bool askConfirmation = false,
+			bool runInBackground = false,
+			bool isPowerShell = false)
+		{
+			var gitExtScriptList = GitUI.Script.ScriptManager.GetScripts();
+
+			GitUI.Script.ScriptInfo newScript = gitExtScriptList.AddNew();
+			newScript.Enabled = enabled;
+			newScript.Name = name;
+			newScript.Command = command;
+			newScript.Arguments = arguments;
+			newScript.AddToRevisionGridContextMenu = addToRevisionGridContextMenu;
+			newScript.OnEvent = onEvent;
+			newScript.AskConfirmation = askConfirmation;
+			newScript.RunInBackground = runInBackground;
+			newScript.IsPowerShell = isPowerShell;
+			newScript.Icon = icon;
+			newScript.HotkeyCommandIdentifier = FirstHotkeyCommandIdentifier + gitExtScriptList.Count;
+		}
+	}
 }

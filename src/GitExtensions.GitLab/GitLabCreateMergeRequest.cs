@@ -21,7 +21,6 @@
 		}
 		public override bool Execute(GitUIEventArgs args)
 		{
-			System.Diagnostics.Debugger.Launch();
 			if (!TryGetRepositoryHost(args.GitModule, args.OwnerForm, out var repoHostPlugin))
 			{
 				return false;
