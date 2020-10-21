@@ -33,16 +33,13 @@ namespace GitExtensions.GitLab.Forms
 
 		private readonly IGitModule gitModule;
 		private readonly IRepositoryHostPlugin repoHost;
-		private readonly GitModuleForm FormBrowse;
+		private readonly RevisionGridControl RevisionGridControl;
 		private readonly AsyncLoader remoteLoader = new AsyncLoader();
 		private readonly AsyncLoader userLoader = new AsyncLoader
 		{
 			Delay = TimeSpan.FromMilliseconds(1000)
 		};
 		private IReadOnlyList<IHostedRemote> hostedRemotes;
-
-		private string selectedSourceBranch;
-		private string selectedTargetBranch;
 		private User[] assigneeUserList;
 		private bool userSearchOngoing = false;
 		private CancellationToken userSearchCancellationToken;
@@ -51,11 +48,11 @@ namespace GitExtensions.GitLab.Forms
 		public CreateMergeRequestForm(
 			IGitModule gitModule,
 			IRepositoryHostPlugin repoHost,
-			GitModuleForm formBrowse)
+			RevisionGridControl revisionGridControl)
 		{
 			this.gitModule = gitModule ?? throw new ArgumentNullException(nameof(gitModule));
 			this.repoHost = repoHost ?? throw new ArgumentNullException(nameof(repoHost));
-			FormBrowse = formBrowse;
+			RevisionGridControl = revisionGridControl;
 			InitializeComponent();
 			InitializeComplete();
 			sourceProjectCB.DisplayMember = nameof(IHostedRemote.RemoteRepositoryName);
@@ -90,10 +87,6 @@ namespace GitExtensions.GitLab.Forms
 						Close();
 						return;
 					}
-
-					selectedSourceBranch = gitModule.IsValidGitWorkingDir()
-						? gitModule.GetSelectedBranch()
-						: string.Empty;
 					InitializeTargets(nonOwnedHostedRemotes);
 				});
 			new AsyncLoader().LoadAsync(
@@ -127,7 +120,7 @@ namespace GitExtensions.GitLab.Forms
 			sourceBranchCB.Items.Clear();
 			sourceBranchCB.Text = strLoading.Text;
 			var selectedBranch = string.Empty;
-			var selectedRevision = FormBrowse.RevisionGridControl.GetSelectedRevisions();
+			var selectedRevision = RevisionGridControl?.GetSelectedRevisions();
 			if (selectedRevision?.Count == 1 && !selectedRevision[0].IsArtificial)
 			{
 				selectedBranch = selectedRevision[0].Refs[0].Name.Split('/')?.LastOrDefault() ?? selectedBranch;
@@ -202,7 +195,7 @@ namespace GitExtensions.GitLab.Forms
 							comboBox.SelectedIndex = selectItem;
 						}
 
-						createMergeRequestBtn.Enabled = true;
+						SetCreateMergeButtonState();
 					})
 				.FileAndForget();
 		}
@@ -255,6 +248,35 @@ namespace GitExtensions.GitLab.Forms
 					userSearchOngoing = false;
 				});
 		}
+
+
+		private void AssigneeCB_Click(object sender, System.EventArgs e)
+		{
+			SetCreateMergeButtonState();
+		}
+
+		private void AssigneeCB_SelectedValueChanged(object sender, System.EventArgs e)
+		{
+			SetCreateMergeButtonState();
+		}
+
+		private void AssigneeCB_TextChanged(object sender, System.EventArgs e)
+		{
+			SetCreateMergeButtonState();
+		}
+		private void MergeRequestTitleTB_TextChanged(object sender, System.EventArgs e)
+		{
+			SetCreateMergeButtonState();
+		}
+
+		private void SetCreateMergeButtonState()
+		{
+			createMergeRequestBtn.Enabled = assigneeCB.SelectedItem != null 
+				&& sourceBranchCB.SelectedItem != null 
+				&& targetBranchCB.SelectedItem != null 
+				&& !string.IsNullOrEmpty(mergeRequestTitleTB.Text);
+		}
+
 
 		private void createMergeRequestBtn_Click(object sender, EventArgs e)
 		{

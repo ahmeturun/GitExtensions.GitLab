@@ -17,27 +17,15 @@ namespace GitExtensions.GitLab.Forms
 		public MergeRequsetFormStatus(string text, string mergeRequestLink, Bitmap dialogIcon, params string[] output) : base(null)
 		{
 			this.mergeRequestLink = mergeRequestLink;
-			StartPosition = FormStartPosition.CenterParent;
 			SetIcon(dialogIcon);
 			InitializeComponent();
-			Ok.Enabled = true;
-			Ok.Focus();
-			AcceptButton = Ok;
-			var consoleOutputControl = new EditboxBasedConsoleOutputControl
-			{
-				Dock = DockStyle.Top,
-				Size = new Size(50,50)
-			};
-			MainPanel.Controls.Add(consoleOutputControl);
+			//Ok.Focus();
+			//Ok.UseWaitCursor = false;
 			if (!string.IsNullOrEmpty(mergeRequestLink))
 			{
-				var mergeRequestUrlLabel = new LinkLabel
-				{
-					Text = "Open merge request in browser"
-				};
 				mergeRequestUrlLabel.Click += MergeRequestUrlLabel_Click;
 				mergeRequestUrlLabel.Dock = DockStyle.Bottom;
-				MainPanel.Controls.Add(mergeRequestUrlLabel);
+				mergeRequestUrlLabel.Visible = true;
 			}
 			Text = text;
 			if (output?.Length > 0)
@@ -47,7 +35,6 @@ namespace GitExtensions.GitLab.Forms
 					AppendMessage(line, consoleOutputControl);
 				}
 			}
-			ControlsPanel.Controls.Add(Ok);
 			InitializeComplete();
 		}
 

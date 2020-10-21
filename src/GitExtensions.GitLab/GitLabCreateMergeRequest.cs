@@ -25,10 +25,12 @@
 			{
 				return false;
 			}
+			var revisionGridControl = (args.OwnerForm as GitModuleForm)?.RevisionGridControl ?? args.OwnerForm as RevisionGridControl;
+
 			var mergeRequestForm = new CreateMergeRequestForm(
 				args.GitModule, 
 				repoHostPlugin,
-				args.OwnerForm as GitModuleForm);
+				revisionGridControl);
 			mergeRequestForm.ShowDialog();
 			return false;
 		}

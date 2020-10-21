@@ -104,6 +104,9 @@
 			this.assigneeCB.Enter += new System.EventHandler(this.assigneeCB_Enter);
 			this.assigneeCB.KeyUp += new System.Windows.Forms.KeyEventHandler(this.assigneeCB_KeyUp);
 			this.assigneeCB.Leave += new System.EventHandler(this.assigneeCB_Leave);
+			this.assigneeCB.Click += AssigneeCB_Click;
+			this.assigneeCB.SelectedValueChanged += AssigneeCB_SelectedValueChanged;
+			this.assigneeCB.TextChanged += AssigneeCB_TextChanged;
 			// 
 			// assigneeLabel
 			// 
@@ -197,6 +200,7 @@
 			this.mergeRequestTitleTB.Name = "mergeRequestTitleTB";
 			this.mergeRequestTitleTB.Size = new System.Drawing.Size(600, 20);
 			this.mergeRequestTitleTB.TabIndex = 10;
+			this.mergeRequestTitleTB.TextChanged += MergeRequestTitleTB_TextChanged;
 			// 
 			// mergeRequestTitleLbl
 			// 
