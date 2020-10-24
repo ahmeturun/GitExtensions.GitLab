@@ -20,7 +20,7 @@
 
                 try
                 {
-                    var user = GitLabPlugin.GitLabClient.GetCurrentUser();
+                    var user = GitLabPlugin.Instance.GitLabClient.GetCurrentUser();
                     if (user != null)
                     {
                         username = user.Name;

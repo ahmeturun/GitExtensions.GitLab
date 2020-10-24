@@ -22,7 +22,7 @@
         {
             if (repo == null)
             {
-                repo = new GitLabRepo(GitLabPlugin.GitLabClient.GetRepository(
+                repo = new GitLabRepo(GitLabPlugin.Instance.GitLabClient.GetRepository(
 					HttpUtility.UrlEncode($"{Owner}/{RemoteRepositoryName}")))
                 {
                     CloneProtocol = CloneProtocol

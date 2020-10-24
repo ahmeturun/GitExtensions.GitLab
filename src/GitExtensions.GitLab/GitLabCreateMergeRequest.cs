@@ -19,13 +19,21 @@
 		{
 			SetNameAndDescription(GitLabCreateMRDescription);
 		}
+
+		public override void Register(IGitUICommands gitUiCommands)
+		{
+			base.Register(gitUiCommands);
+		}
+
 		public override bool Execute(GitUIEventArgs args)
 		{
 			if (!TryGetRepositoryHost(args.GitModule, args.OwnerForm, out var repoHostPlugin))
 			{
 				return false;
 			}
-			var revisionGridControl = (args.OwnerForm as GitModuleForm)?.RevisionGridControl ?? args.OwnerForm as RevisionGridControl;
+			var revisionGridControl = (args.OwnerForm as GitModuleForm)?.RevisionGridControl 
+				?? args.OwnerForm as RevisionGridControl
+				?? ((args.OwnerForm as Form).Owner as GitUI.CommandsDialogs.FormBrowse)?.RevisionGridControl;
 
 			var mergeRequestForm = new CreateMergeRequestForm(
 				args.GitModule, 

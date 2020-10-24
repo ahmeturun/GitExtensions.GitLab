@@ -13,6 +13,8 @@ using GitExtUtils;
 using GitCommands;
 using GitCommands.Config;
 using GitExtensions.GitLab.Remote;
+using GitExtensions.GitLab.Forms;
+using GitUI.Properties;
 
 namespace GitExtensions.GitLab
 {
@@ -23,32 +25,22 @@ namespace GitExtensions.GitLab
 	[Export(typeof(IGitPlugin))]
 	public class GitLabPlugin : GitPluginBase, IRepositoryHostPlugin
 	{
-		private static readonly int FirstHotkeyCommandIdentifier = 10000; // Arbitrary choosen. GE by default starts at 9000 for it's own scripts.
+		#region Translation
+		private readonly TranslationString authenticationError = new TranslationString("Authentication Failed.");
+		private readonly TranslationString repoInitializationError = new TranslationString("Error on repo initialization.");
+		#endregion
 
-		private readonly Func<IGitModule> getModule;
 		public readonly StringSetting OAuthToken = new StringSetting("OAuth Token", "");
-		public readonly StringSetting GitLabHost = new StringSetting(
-			"GitLab (Enterprise) hostname",
-			"https://gitlab.com");
+		public readonly StringSetting GitLabHost = new StringSetting("GitLab (Enterprise) hostname","https://gitlab.com");
 		private readonly ArgumentString cmdInfo = new GitArgumentBuilder("status");
 		private RepoType? repoType = null;
-
 		private IGitUICommands currentGitUiCommands;
 
-		public string GitLabHostParsed => $"https://{GitLabHost.ValueOrDefault(Settings).Replace("https://", "").Replace("http://", "").Trim('/')}";
-		public string GitLabApiEndpoint => $"{GitLabHostParsed}/api/v4/";
-
-		private IGitModule gitModule;
-
 		internal static GitLabPlugin Instance;
-		internal static Client.Client gitLab;
-		internal static Client.Client GitLabClient => gitLab ?? (gitLab = new Client.Client(
-			Instance.GitLabHostParsed,
-			Instance.OAuthToken.ValueOrDefault(Instance.Settings)));
+		internal Client.Client GitLabClient { get; private set; }
 
-		public bool ConfigurationOk => !string.IsNullOrEmpty(OAuthToken.ValueOrDefault(Settings));
-
-		public string OwnerLogin => GitLabClient.GetCurrentUser()?.Username;
+		public bool ConfigurationOk => !string.IsNullOrEmpty(OAuthToken.ValueOrDefault(Settings)) 
+			&& !string.IsNullOrEmpty(GitLabHost.ValueOrDefault(Settings));
 
 		public GitLabPlugin() : base(true)
 		{
@@ -67,12 +59,13 @@ namespace GitExtensions.GitLab
 		/// </summary>
 		public override void Register(IGitUICommands gitUiCommands)
 		{
-			currentGitUiCommands = gitUiCommands;
-			if (IsGitLabRepo(gitUiCommands))
+			currentGitUiCommands = gitUiCommands;;
+			currentGitUiCommands.PostSettings += CurrentGitUiCommands_PostSettings;
+			InitializeConfiguredParameters();
+			if (ConfigurationOk && IsGitLabRepo(gitUiCommands))
 			{
 				base.Register(gitUiCommands);
 				GitLabPluginScriptManager.Initialize();
-				gitModule = gitUiCommands.GitModule;
 				ForceRefreshGE(gitUiCommands);
 			}
 			else
@@ -80,6 +73,19 @@ namespace GitExtensions.GitLab
 				GitLabPluginScriptManager.Clean();
 				ForceRefreshGE(gitUiCommands);
 			}
+		}
+
+		private void CurrentGitUiCommands_PostSettings(object sender, GitUIPostActionEventArgs e)
+		{
+			Register(currentGitUiCommands);
+		}
+
+		private void InitializeConfiguredParameters()
+		{
+			var gitLabHostParsed = $"https://{GitLabHost.ValueOrDefault(Settings).Replace("https://", "").Replace("http://", "").Trim('/')}";
+			GitLabClient = new Client.Client(
+				gitLabHostParsed,
+				Instance.OAuthToken.ValueOrDefault(Instance.Settings));
 		}
 
 		public override void Unregister(IGitUICommands gitUiCommands)
@@ -92,58 +98,15 @@ namespace GitExtensions.GitLab
 			repoType = null;
 		}
 
-		///// <summary>
-		///// This is where you define the plugin setting page displayed in Git Extensions settings and that allows the user to configure the plugin settings.
-		///// You should return a collection of ISetting instances that could be of types:
-		/////   * `BoolSetting` to store a boolean (display a Checkbox control),
-		/////   * `StringSetting` to store a string (display a TextBox control),
-		/////   * `NumberSetting` to store a number (display a TextBox control),
-		/////   * `ChoiceSetting` to propose choices and store a string (display a ComboBox control),
-		/////   * `PasswordSetting` to store a password (display a password TextBox control),
-		/////   * `CredentialsSetting` to store a login and a password (display a login and a password fields),
-		///// See an example: https://github.com/gitextensions/gitextensions/blob/master/Plugins/JiraCommitHintPlugin/JiraCommitHintPlugin.cs
-		///// </summary>
-		//public override IEnumerable<ISetting> GetSettings()
-		//{
-		//    // Uncomment and fill if your plugin have settings that the user could configure
-		//}
-
-		/// <summary>
-		/// Is called when the plugin's name is clicked in Git Extensions' Plugins menu.
-		/// Must return `true` if the revision grid should be refreshed after the execution of the plugin. false, otherwise.
-		/// Help: You could call args.GitUICommands.StartSettingsDialog(this); in this method to open the setting page of the plugin.
-		/// </summary>
-		/// <returns>
-		/// Returns <see langword="true"/> if the revision grid should be refreshed after the execution of the plugin;
-		/// otherwise <see langword="false"/>.
-		/// </returns>
 		public override bool Execute(GitUIEventArgs gitUIEventArgs)
 		{
-			/*
-             * open new form for below actions:
-             *  Create Pull request
-             */
-
-			// Put your action logic here
-			MessageBox.Show(gitUIEventArgs.OwnerForm, "Hello from the Plugin Template.", "Git Extensions");
+			gitUIEventArgs.GitUICommands.StartSettingsDialog(this);
 			return false;
 		}
 
 		private void ForceRefreshGE(IGitUICommands gitUiCommands)
 		{
 			gitUiCommands.RepoChangedNotifier.Notify();
-		}
-
-		private IGitModule GetModule()
-		{
-			var module = getModule();
-
-			if (module == null)
-			{
-				throw new ArgumentException($"Require a valid instance of {nameof(IGitModule)}");
-			}
-
-			return module;
 		}
 
 		public override IEnumerable<ISetting> GetSettings()
@@ -153,6 +116,8 @@ namespace GitExtensions.GitLab
 		}
 
 		#region IRepositoryHostPlugin definitions
+
+		public string OwnerLogin => GitLabClient.GetCurrentUser()?.Username;
 
 		public IReadOnlyList<IHostedRepository> SearchForRepository(string search)
 		{
@@ -202,11 +167,33 @@ namespace GitExtensions.GitLab
 					: RepoType.Unknown;
 			}
 
-			return repoType == RepoType.git && GetHostedRemotesForModule().Count() > 0;
+			try
+			{
+				return repoType == RepoType.git && GetHostedRemotesForModule().Count() > 0;
+			}
+			catch (UnauthorizedAccessException)
+			{
+				new MergeRequsetFormStatus(
+						$"GitLab Plugin -{authenticationError.Text}",
+						string.Empty,
+						Images.StatusBadgeError,
+						"Given private key is not valid.").ShowDialog();
+				return false;
+			}
+			catch(Exception ex)
+			{
+				new MergeRequsetFormStatus(
+						$"GitLab Plugin -{repoInitializationError.Text}",
+						string.Empty,
+						Images.StatusBadgeError,
+						ex.Message).ShowDialog();
+				return false;
+			}
+
 		}
 
 		/// <summary>
-		/// Returns all relevant github-remotes for the current working directory
+		/// Returns all relevant git-remotes for the current working directory
 		/// </summary>
 		public IReadOnlyList<IHostedRemote> GetHostedRemotesForModule()
 		{
@@ -247,5 +234,7 @@ namespace GitExtensions.GitLab
 				}
 			}
 		}
+
+
 	}
 }

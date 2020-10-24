@@ -96,7 +96,7 @@
 				() => 
 				{
 					userSearchOngoing = true;
-					return GitLabPlugin.GitLabClient.GetUsers().ToArray();
+					return GitLabPlugin.Instance.GitLabClient.GetUsers().ToArray();
 				},
 				users =>
 				{
@@ -237,7 +237,7 @@
 					{
 						return assigneeUserList;
 					}
-					return GitLabPlugin.GitLabClient.GetUsers(searchText).ToArray();
+					return GitLabPlugin.Instance.GitLabClient.GetUsers(searchText).ToArray();
 				},
 				users =>
 				{
@@ -308,7 +308,7 @@
 			mergeRequestCreateLoading.Visible = true;
 			mergeRequestCreateLoading.IsAnimating = true;
 			mergeRequestLoader.LoadAsync(
-				() => GitLabPlugin.GitLabClient.CreateMergeRequest(mergeRequest),
+				() => GitLabPlugin.Instance.GitLabClient.CreateMergeRequest(mergeRequest),
 				createdMergeRequest =>
 				{
 					new MergeRequsetFormStatus(
@@ -377,7 +377,7 @@
 		}
 
 		private BranchDiff GetDiffData(int projectId, string sourceId, string targetId)
-			=> GitLabPlugin.GitLabClient.GetBranchDiff(projectId, sourceId, targetId);
+			=> GitLabPlugin.Instance.GitLabClient.GetBranchDiff(projectId, sourceId, targetId);
 
 		private void SplitAndLoadDiff(BranchDiff diffData, string baseSha, string secondSha)
 		{

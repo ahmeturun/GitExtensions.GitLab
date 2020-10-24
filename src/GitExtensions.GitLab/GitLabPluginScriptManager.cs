@@ -15,6 +15,7 @@
 		{
 			Clean();
 			AddNew(CreateMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateMergeRequestPluginScript.Command);
+			AddNew(CreateMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateMergeRequestPluginScript.Command, onEvent: GitUI.Script.ScriptEvent.AfterPush);
 			AddNew(CreateManageMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateManageMergeRequestPluginScript.Command);
 		}
 
@@ -27,10 +28,10 @@
 		private static void Remove(GitLabPluginScript gitLabPluginScript)
 		{
 			var gitExtScriptList = GitUI.Script.ScriptManager.GetScripts();
-			var registeredPluginScript = gitExtScriptList.FirstOrDefault(item => item.Name == gitLabPluginScript.Name && item.Command == gitLabPluginScript.Command);
-			if(registeredPluginScript != null)
+			var registeredPluginScript = gitExtScriptList.Where(item => item.Name == gitLabPluginScript.Name && item.Command == gitLabPluginScript.Command);
+			if(registeredPluginScript != null && registeredPluginScript.Any())
 			{
-				gitExtScriptList.Remove(registeredPluginScript);
+				registeredPluginScript.ForEach(script => gitExtScriptList.Remove(script));
 			}
 		}
 
