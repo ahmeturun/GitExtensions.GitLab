@@ -52,7 +52,6 @@
 			if (repo == null)
 				return null;
 
-			repo.client = client;
 			return repo;
 		}
 
