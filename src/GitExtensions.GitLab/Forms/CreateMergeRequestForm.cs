@@ -431,7 +431,7 @@
 			}
 			else
 			{
-				diffViewer.ViewFixedPatch(gis.Name, text: data);
+				diffViewer.ViewPatch(gis.Name, text: data);
 			}
 		}
 		#endregion
