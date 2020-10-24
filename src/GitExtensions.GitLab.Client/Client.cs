@@ -51,7 +51,7 @@
 			var repo = GetRequest<Repository>(request);
 			if (repo == null)
 				return null;
-
+			repo.GitLabClient = client;
 			return repo;
 		}
 

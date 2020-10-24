@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using GitExtensions.GitLab.Client.Repo;
-    using GitUIPluginInterfaces.RepositoryHosts;
+	using System.Linq;
+	using GitExtensions.GitLab.Client.Repo;
+	using GitExtensions.GitLab.Remote;
+	using GitUIPluginInterfaces.RepositoryHosts;
 
     public class GitLabRepo : IHostedRepository
     {
@@ -46,24 +48,14 @@
         public string CloneReadOnlyUrl => "";
 
         public IReadOnlyList<IHostedBranch> GetBranches()
-        {
-			throw new NotImplementedException();
-		}
+            => repo.GetBranches()
+                .Select(branch => new GitLabBranch(branch))
+                .OrderBy(branch => branch.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-        public string GetDefaultBranch()
-        {
-			throw new NotImplementedException();
-        }
+        public string GetDefaultBranch() => repo.DefaultBranch;
 
-        public IHostedRepository Fork()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyList<IPullRequestInformation> GetMergeRequests()
-        {
-            throw new NotImplementedException();
-        }
+        public IHostedRepository Fork() => default;
 
         public int CreatePullRequest(string myBranch, string remoteBranch, string title, string body)
         {
@@ -76,9 +68,6 @@
 
         public override string ToString() => $"{Owner}/{Name}";
 
-        public IReadOnlyList<IPullRequestInformation> GetPullRequests()
-        {
-            throw new NotImplementedException();
-        }
+        public IReadOnlyList<IPullRequestInformation> GetPullRequests() => Array.Empty<IPullRequestInformation>();
     }
 }

@@ -1,8 +1,10 @@
 ﻿namespace GitExtensions.GitLab.Client.Repo
 {
     using Newtonsoft.Json;
+	using RestSharp;
+	using System.Collections.Generic;
 
-    public class Repository
+	public class Repository
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -25,7 +27,14 @@
         public bool CanCreateMergeRequestIn { get; set; }
 
 
-        public override bool Equals(object obj)
+        internal IRestClient GitLabClient;
+        public IList<Branch> GetBranches()
+        {
+            RestRequest request = new RestRequest($"/api/v4/projects/{Id}/repository/branches");
+            return GitLabClient.GetList<Branch>(request);
+        }
+
+    public override bool Equals(object obj)
         {
             return obj is Repository && GetHashCode() == obj.GetHashCode();
         }
