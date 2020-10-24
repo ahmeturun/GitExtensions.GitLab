@@ -64,7 +64,7 @@
 			this.sourceBranchCB.FormattingEnabled = true;
 			this.sourceBranchCB.Location = new System.Drawing.Point(99, 46);
 			this.sourceBranchCB.Name = "sourceBranchCB";
-			this.sourceBranchCB.Size = new System.Drawing.Size(229, 21);
+			this.sourceBranchCB.Size = new System.Drawing.Size(391, 21);
 			this.sourceBranchCB.TabIndex = 0;
 			this.sourceBranchCB.SelectedIndexChanged += new System.EventHandler(this.branchCB_SelectedIndexChanged);
 			// 
@@ -74,7 +74,7 @@
 			this.targetBranchCB.FormattingEnabled = true;
 			this.targetBranchCB.Location = new System.Drawing.Point(99, 46);
 			this.targetBranchCB.Name = "targetBranchCB";
-			this.targetBranchCB.Size = new System.Drawing.Size(229, 21);
+			this.targetBranchCB.Size = new System.Drawing.Size(391, 21);
 			this.targetBranchCB.TabIndex = 1;
 			this.targetBranchCB.SelectedIndexChanged += new System.EventHandler(this.branchCB_SelectedIndexChanged);
 			// 
@@ -101,10 +101,13 @@
 			this.assigneeCB.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
 			this.assigneeCB.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
 			this.assigneeCB.FormattingEnabled = true;
-			this.assigneeCB.Location = new System.Drawing.Point(99, 153);
+			this.assigneeCB.Location = new System.Drawing.Point(99, 115);
 			this.assigneeCB.Name = "assigneeCB";
 			this.assigneeCB.Size = new System.Drawing.Size(229, 21);
 			this.assigneeCB.TabIndex = 4;
+			this.assigneeCB.SelectedValueChanged += new System.EventHandler(this.AssigneeCB_SelectedValueChanged);
+			this.assigneeCB.TextChanged += new System.EventHandler(this.AssigneeCB_TextChanged);
+			this.assigneeCB.Click += new System.EventHandler(this.AssigneeCB_Click);
 			this.assigneeCB.Enter += new System.EventHandler(this.assigneeCB_Enter);
 			this.assigneeCB.KeyUp += new System.Windows.Forms.KeyEventHandler(this.assigneeCB_KeyUp);
 			this.assigneeCB.Leave += new System.EventHandler(this.assigneeCB_Leave);
@@ -112,7 +115,7 @@
 			// assigneeLabel
 			// 
 			this.assigneeLabel.AutoSize = true;
-			this.assigneeLabel.Location = new System.Drawing.Point(7, 156);
+			this.assigneeLabel.Location = new System.Drawing.Point(7, 118);
 			this.assigneeLabel.Name = "assigneeLabel";
 			this.assigneeLabel.Size = new System.Drawing.Size(50, 13);
 			this.assigneeLabel.TabIndex = 5;
@@ -120,7 +123,7 @@
 			// 
 			// createMergeRequestBtn
 			// 
-			this.createMergeRequestBtn.Location = new System.Drawing.Point(606, 386);
+			this.createMergeRequestBtn.Location = new System.Drawing.Point(893, 319);
 			this.createMergeRequestBtn.Name = "createMergeRequestBtn";
 			this.createMergeRequestBtn.Size = new System.Drawing.Size(140, 23);
 			this.createMergeRequestBtn.TabIndex = 6;
@@ -134,7 +137,7 @@
 			this.mergeRequestDetailTB.Location = new System.Drawing.Point(99, 51);
 			this.mergeRequestDetailTB.Multiline = true;
 			this.mergeRequestDetailTB.Name = "mergeRequestDetailTB";
-			this.mergeRequestDetailTB.Size = new System.Drawing.Size(600, 96);
+			this.mergeRequestDetailTB.Size = new System.Drawing.Size(916, 58);
 			this.mergeRequestDetailTB.TabIndex = 7;
 			// 
 			// mergeRequestDetailLabel
@@ -159,9 +162,9 @@
 			this.mergeRequestData.Controls.Add(this.assigneeLabel);
 			this.mergeRequestData.Controls.Add(this.assigneeCB);
 			this.mergeRequestData.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-			this.mergeRequestData.Location = new System.Drawing.Point(32, 144);
+			this.mergeRequestData.Location = new System.Drawing.Point(12, 120);
 			this.mergeRequestData.Name = "mergeRequestData";
-			this.mergeRequestData.Size = new System.Drawing.Size(714, 236);
+			this.mergeRequestData.Size = new System.Drawing.Size(1021, 193);
 			this.mergeRequestData.TabIndex = 9;
 			this.mergeRequestData.TabStop = false;
 			this.mergeRequestData.Text = "Merge Request Data";
@@ -169,7 +172,7 @@
 			// squashCommitsChkBox
 			// 
 			this.squashCommitsChkBox.AutoSize = true;
-			this.squashCommitsChkBox.Location = new System.Drawing.Point(99, 205);
+			this.squashCommitsChkBox.Location = new System.Drawing.Point(99, 167);
 			this.squashCommitsChkBox.Name = "squashCommitsChkBox";
 			this.squashCommitsChkBox.Size = new System.Drawing.Size(263, 17);
 			this.squashCommitsChkBox.TabIndex = 13;
@@ -179,7 +182,7 @@
 			// mergeOptionsGroup
 			// 
 			this.mergeOptionsGroup.AutoSize = true;
-			this.mergeOptionsGroup.Location = new System.Drawing.Point(7, 181);
+			this.mergeOptionsGroup.Location = new System.Drawing.Point(7, 143);
 			this.mergeOptionsGroup.Name = "mergeOptionsGroup";
 			this.mergeOptionsGroup.Size = new System.Drawing.Size(74, 13);
 			this.mergeOptionsGroup.TabIndex = 12;
@@ -188,7 +191,7 @@
 			// deleteSourceBranchChkBox
 			// 
 			this.deleteSourceBranchChkBox.AutoSize = true;
-			this.deleteSourceBranchChkBox.Location = new System.Drawing.Point(99, 181);
+			this.deleteSourceBranchChkBox.Location = new System.Drawing.Point(99, 143);
 			this.deleteSourceBranchChkBox.Name = "deleteSourceBranchChkBox";
 			this.deleteSourceBranchChkBox.Size = new System.Drawing.Size(288, 17);
 			this.deleteSourceBranchChkBox.TabIndex = 11;
@@ -199,8 +202,9 @@
 			// 
 			this.mergeRequestTitleTB.Location = new System.Drawing.Point(99, 25);
 			this.mergeRequestTitleTB.Name = "mergeRequestTitleTB";
-			this.mergeRequestTitleTB.Size = new System.Drawing.Size(600, 20);
+			this.mergeRequestTitleTB.Size = new System.Drawing.Size(916, 20);
 			this.mergeRequestTitleTB.TabIndex = 10;
+			this.mergeRequestTitleTB.TextChanged += new System.EventHandler(this.MergeRequestTitleTB_TextChanged);
 			// 
 			// mergeRequestTitleLbl
 			// 
@@ -218,9 +222,9 @@
 			this.sourceBranchGroup.Controls.Add(this.sourceProjectCB);
 			this.sourceBranchGroup.Controls.Add(this.sourceProjectLbl);
 			this.sourceBranchGroup.Controls.Add(this.sourceBranchLabel);
-			this.sourceBranchGroup.Location = new System.Drawing.Point(32, 35);
+			this.sourceBranchGroup.Location = new System.Drawing.Point(12, 35);
 			this.sourceBranchGroup.Name = "sourceBranchGroup";
-			this.sourceBranchGroup.Size = new System.Drawing.Size(343, 79);
+			this.sourceBranchGroup.Size = new System.Drawing.Size(505, 79);
 			this.sourceBranchGroup.TabIndex = 10;
 			this.sourceBranchGroup.TabStop = false;
 			this.sourceBranchGroup.Text = "Source";
@@ -231,7 +235,7 @@
 			this.sourceProjectCB.FormattingEnabled = true;
 			this.sourceProjectCB.Location = new System.Drawing.Point(99, 19);
 			this.sourceProjectCB.Name = "sourceProjectCB";
-			this.sourceProjectCB.Size = new System.Drawing.Size(229, 21);
+			this.sourceProjectCB.Size = new System.Drawing.Size(391, 21);
 			this.sourceProjectCB.TabIndex = 1;
 			this.sourceProjectCB.SelectedIndexChanged += new System.EventHandler(this.sourceProjectCB_SelectedIndexChanged);
 			// 
@@ -251,9 +255,9 @@
 			this.targetBranchGroup.Controls.Add(this.targetBranchLabel);
 			this.targetBranchGroup.Controls.Add(this.targetProjectCB);
 			this.targetBranchGroup.Controls.Add(this.targetProjectLbl);
-			this.targetBranchGroup.Location = new System.Drawing.Point(403, 35);
+			this.targetBranchGroup.Location = new System.Drawing.Point(528, 35);
 			this.targetBranchGroup.Name = "targetBranchGroup";
-			this.targetBranchGroup.Size = new System.Drawing.Size(343, 79);
+			this.targetBranchGroup.Size = new System.Drawing.Size(505, 79);
 			this.targetBranchGroup.TabIndex = 11;
 			this.targetBranchGroup.TabStop = false;
 			this.targetBranchGroup.Text = "Target";
@@ -265,7 +269,7 @@
 			this.targetProjectCB.FormattingEnabled = true;
 			this.targetProjectCB.Location = new System.Drawing.Point(99, 19);
 			this.targetProjectCB.Name = "targetProjectCB";
-			this.targetProjectCB.Size = new System.Drawing.Size(229, 21);
+			this.targetProjectCB.Size = new System.Drawing.Size(391, 21);
 			this.targetProjectCB.TabIndex = 0;
 			this.targetProjectCB.SelectedIndexChanged += new System.EventHandler(this.targetProjectCB_SelectedIndexChanged);
 			// 
@@ -284,25 +288,25 @@
 			this.mergeRequestCreateLoading.IsAnimating = true;
 			this.mergeRequestCreateLoading.Location = new System.Drawing.Point(0, 0);
 			this.mergeRequestCreateLoading.Name = "mergeRequestCreateLoading";
-			this.mergeRequestCreateLoading.Size = new System.Drawing.Size(784, 784);
+			this.mergeRequestCreateLoading.Size = new System.Drawing.Size(1045, 730);
 			this.mergeRequestCreateLoading.TabIndex = 12;
 			// 
-			// fileViewer1
+			// diffViewer
 			// 
-			this.diffViewer.Location = new System.Drawing.Point(32, 502);
+			this.diffViewer.Location = new System.Drawing.Point(277, 369);
 			this.diffViewer.Margin = new System.Windows.Forms.Padding(0);
-			this.diffViewer.Name = "fileViewer1";
-			this.diffViewer.Size = new System.Drawing.Size(714, 273);
+			this.diffViewer.Name = "diffViewer";
+			this.diffViewer.Size = new System.Drawing.Size(756, 348);
 			this.diffViewer.TabIndex = 13;
 			// 
-			// fileStatusList1
+			// fileStatusList
 			// 
 			this.fileStatusList.FilterVisible = true;
 			this.fileStatusList.GroupByRevision = false;
-			this.fileStatusList.Location = new System.Drawing.Point(32, 427);
+			this.fileStatusList.Location = new System.Drawing.Point(26, 373);
 			this.fileStatusList.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-			this.fileStatusList.Name = "fileStatusList1";
-			this.fileStatusList.Size = new System.Drawing.Size(714, 71);
+			this.fileStatusList.Name = "fileStatusList";
+			this.fileStatusList.Size = new System.Drawing.Size(248, 344);
 			this.fileStatusList.TabIndex = 14;
 			// 
 			// CreateMergeRequestForm
@@ -310,7 +314,7 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			this.ClientSize = new System.Drawing.Size(784, 784);
+			this.ClientSize = new System.Drawing.Size(1045, 730);
 			this.Controls.Add(this.fileStatusList);
 			this.Controls.Add(this.diffViewer);
 			this.Controls.Add(this.targetBranchGroup);
