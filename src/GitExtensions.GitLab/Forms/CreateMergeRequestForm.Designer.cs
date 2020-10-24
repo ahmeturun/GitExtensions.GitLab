@@ -52,6 +52,7 @@
 			this.mergeRequestCreateLoading = new GitUI.UserControls.RevisionGrid.LoadingControl();
 			this.diffViewer = new GitUI.Editor.FileViewer();
 			this.fileStatusList = new GitUI.FileStatusList();
+			this.cancelMergeRequestFormBtn = new System.Windows.Forms.Button();
 			this.mergeRequestData.SuspendLayout();
 			this.sourceBranchGroup.SuspendLayout();
 			this.targetBranchGroup.SuspendLayout();
@@ -60,7 +61,7 @@
 			// sourceBranchCB
 			// 
 			this.sourceBranchCB.BackColor = System.Drawing.SystemColors.Window;
-			this.sourceBranchCB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.sourceBranchCB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.sourceBranchCB.FormattingEnabled = true;
 			this.sourceBranchCB.Location = new System.Drawing.Point(99, 46);
 			this.sourceBranchCB.Name = "sourceBranchCB";
@@ -70,7 +71,7 @@
 			// 
 			// targetBranchCB
 			// 
-			this.targetBranchCB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.targetBranchCB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.targetBranchCB.FormattingEnabled = true;
 			this.targetBranchCB.Location = new System.Drawing.Point(99, 46);
 			this.targetBranchCB.Name = "targetBranchCB";
@@ -100,8 +101,9 @@
 			// 
 			this.assigneeCB.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
 			this.assigneeCB.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+			this.assigneeCB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.assigneeCB.FormattingEnabled = true;
-			this.assigneeCB.Location = new System.Drawing.Point(99, 115);
+			this.assigneeCB.Location = new System.Drawing.Point(99, 125);
 			this.assigneeCB.Name = "assigneeCB";
 			this.assigneeCB.Size = new System.Drawing.Size(229, 21);
 			this.assigneeCB.TabIndex = 4;
@@ -115,7 +117,7 @@
 			// assigneeLabel
 			// 
 			this.assigneeLabel.AutoSize = true;
-			this.assigneeLabel.Location = new System.Drawing.Point(7, 118);
+			this.assigneeLabel.Location = new System.Drawing.Point(7, 125);
 			this.assigneeLabel.Name = "assigneeLabel";
 			this.assigneeLabel.Size = new System.Drawing.Size(50, 13);
 			this.assigneeLabel.TabIndex = 5;
@@ -123,18 +125,22 @@
 			// 
 			// createMergeRequestBtn
 			// 
-			this.createMergeRequestBtn.Location = new System.Drawing.Point(893, 319);
+			this.createMergeRequestBtn.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+			this.createMergeRequestBtn.FlatAppearance.BorderSize = 0;
+			this.createMergeRequestBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.createMergeRequestBtn.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+			this.createMergeRequestBtn.Location = new System.Drawing.Point(893, 331);
 			this.createMergeRequestBtn.Name = "createMergeRequestBtn";
 			this.createMergeRequestBtn.Size = new System.Drawing.Size(140, 23);
 			this.createMergeRequestBtn.TabIndex = 6;
 			this.createMergeRequestBtn.Text = "Create Merge Request";
-			this.createMergeRequestBtn.UseVisualStyleBackColor = true;
+			this.createMergeRequestBtn.UseVisualStyleBackColor = false;
 			this.createMergeRequestBtn.Click += new System.EventHandler(this.createMergeRequestBtn_Click);
 			// 
 			// mergeRequestDetailTB
 			// 
 			this.mergeRequestDetailTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-			this.mergeRequestDetailTB.Location = new System.Drawing.Point(99, 51);
+			this.mergeRequestDetailTB.Location = new System.Drawing.Point(99, 60);
 			this.mergeRequestDetailTB.Multiline = true;
 			this.mergeRequestDetailTB.Name = "mergeRequestDetailTB";
 			this.mergeRequestDetailTB.Size = new System.Drawing.Size(916, 58);
@@ -143,7 +149,7 @@
 			// mergeRequestDetailLabel
 			// 
 			this.mergeRequestDetailLabel.AutoSize = true;
-			this.mergeRequestDetailLabel.Location = new System.Drawing.Point(7, 54);
+			this.mergeRequestDetailLabel.Location = new System.Drawing.Point(7, 63);
 			this.mergeRequestDetailLabel.Name = "mergeRequestDetailLabel";
 			this.mergeRequestDetailLabel.Size = new System.Drawing.Size(39, 13);
 			this.mergeRequestDetailLabel.TabIndex = 8;
@@ -162,9 +168,10 @@
 			this.mergeRequestData.Controls.Add(this.assigneeLabel);
 			this.mergeRequestData.Controls.Add(this.assigneeCB);
 			this.mergeRequestData.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+			this.mergeRequestData.ForeColor = System.Drawing.SystemColors.ControlText;
 			this.mergeRequestData.Location = new System.Drawing.Point(12, 120);
 			this.mergeRequestData.Name = "mergeRequestData";
-			this.mergeRequestData.Size = new System.Drawing.Size(1021, 193);
+			this.mergeRequestData.Size = new System.Drawing.Size(1021, 205);
 			this.mergeRequestData.TabIndex = 9;
 			this.mergeRequestData.TabStop = false;
 			this.mergeRequestData.Text = "Merge Request Data";
@@ -172,9 +179,10 @@
 			// squashCommitsChkBox
 			// 
 			this.squashCommitsChkBox.AutoSize = true;
-			this.squashCommitsChkBox.Location = new System.Drawing.Point(99, 167);
+			this.squashCommitsChkBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.squashCommitsChkBox.Location = new System.Drawing.Point(99, 177);
 			this.squashCommitsChkBox.Name = "squashCommitsChkBox";
-			this.squashCommitsChkBox.Size = new System.Drawing.Size(263, 17);
+			this.squashCommitsChkBox.Size = new System.Drawing.Size(260, 17);
 			this.squashCommitsChkBox.TabIndex = 13;
 			this.squashCommitsChkBox.Text = "Squash commits when merge request is accepted.";
 			this.squashCommitsChkBox.UseVisualStyleBackColor = true;
@@ -182,7 +190,7 @@
 			// mergeOptionsGroup
 			// 
 			this.mergeOptionsGroup.AutoSize = true;
-			this.mergeOptionsGroup.Location = new System.Drawing.Point(7, 143);
+			this.mergeOptionsGroup.Location = new System.Drawing.Point(7, 153);
 			this.mergeOptionsGroup.Name = "mergeOptionsGroup";
 			this.mergeOptionsGroup.Size = new System.Drawing.Size(74, 13);
 			this.mergeOptionsGroup.TabIndex = 12;
@@ -191,25 +199,30 @@
 			// deleteSourceBranchChkBox
 			// 
 			this.deleteSourceBranchChkBox.AutoSize = true;
-			this.deleteSourceBranchChkBox.Location = new System.Drawing.Point(99, 143);
+			this.deleteSourceBranchChkBox.FlatAppearance.BorderSize = 0;
+			this.deleteSourceBranchChkBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.deleteSourceBranchChkBox.Location = new System.Drawing.Point(99, 153);
 			this.deleteSourceBranchChkBox.Name = "deleteSourceBranchChkBox";
-			this.deleteSourceBranchChkBox.Size = new System.Drawing.Size(288, 17);
+			this.deleteSourceBranchChkBox.Size = new System.Drawing.Size(285, 17);
 			this.deleteSourceBranchChkBox.TabIndex = 11;
 			this.deleteSourceBranchChkBox.Text = "Delete source branch when merge request is accepted.";
 			this.deleteSourceBranchChkBox.UseVisualStyleBackColor = true;
 			// 
 			// mergeRequestTitleTB
 			// 
+			this.mergeRequestTitleTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+			this.mergeRequestTitleTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.mergeRequestTitleTB.Location = new System.Drawing.Point(99, 25);
+			this.mergeRequestTitleTB.Multiline = true;
 			this.mergeRequestTitleTB.Name = "mergeRequestTitleTB";
-			this.mergeRequestTitleTB.Size = new System.Drawing.Size(916, 20);
+			this.mergeRequestTitleTB.Size = new System.Drawing.Size(916, 29);
 			this.mergeRequestTitleTB.TabIndex = 10;
 			this.mergeRequestTitleTB.TextChanged += new System.EventHandler(this.MergeRequestTitleTB_TextChanged);
 			// 
 			// mergeRequestTitleLbl
 			// 
 			this.mergeRequestTitleLbl.AutoSize = true;
-			this.mergeRequestTitleLbl.Location = new System.Drawing.Point(7, 28);
+			this.mergeRequestTitleLbl.Location = new System.Drawing.Point(7, 25);
 			this.mergeRequestTitleLbl.Name = "mergeRequestTitleLbl";
 			this.mergeRequestTitleLbl.Size = new System.Drawing.Size(27, 13);
 			this.mergeRequestTitleLbl.TabIndex = 9;
@@ -231,7 +244,7 @@
 			// 
 			// sourceProjectCB
 			// 
-			this.sourceProjectCB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.sourceProjectCB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.sourceProjectCB.FormattingEnabled = true;
 			this.sourceProjectCB.Location = new System.Drawing.Point(99, 19);
 			this.sourceProjectCB.Name = "sourceProjectCB";
@@ -265,7 +278,7 @@
 			// targetProjectCB
 			// 
 			this.targetProjectCB.BackColor = System.Drawing.SystemColors.Window;
-			this.targetProjectCB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.targetProjectCB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.targetProjectCB.FormattingEnabled = true;
 			this.targetProjectCB.Location = new System.Drawing.Point(99, 19);
 			this.targetProjectCB.Name = "targetProjectCB";
@@ -285,6 +298,7 @@
 			// mergeRequestCreateLoading
 			// 
 			this.mergeRequestCreateLoading.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.mergeRequestCreateLoading.ForeColor = System.Drawing.SystemColors.ControlDark;
 			this.mergeRequestCreateLoading.IsAnimating = true;
 			this.mergeRequestCreateLoading.Location = new System.Drawing.Point(0, 0);
 			this.mergeRequestCreateLoading.Name = "mergeRequestCreateLoading";
@@ -309,19 +323,34 @@
 			this.fileStatusList.Size = new System.Drawing.Size(248, 344);
 			this.fileStatusList.TabIndex = 14;
 			// 
+			// cancelMergeRequestFormBtn
+			// 
+			this.cancelMergeRequestFormBtn.BackColor = System.Drawing.SystemColors.ControlDark;
+			this.cancelMergeRequestFormBtn.FlatAppearance.BorderSize = 0;
+			this.cancelMergeRequestFormBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.cancelMergeRequestFormBtn.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+			this.cancelMergeRequestFormBtn.Location = new System.Drawing.Point(747, 331);
+			this.cancelMergeRequestFormBtn.Name = "cancelMergeRequestFormBtn";
+			this.cancelMergeRequestFormBtn.Size = new System.Drawing.Size(140, 23);
+			this.cancelMergeRequestFormBtn.TabIndex = 15;
+			this.cancelMergeRequestFormBtn.Text = "Cancel";
+			this.cancelMergeRequestFormBtn.UseVisualStyleBackColor = false;
+			this.cancelMergeRequestFormBtn.Click += new System.EventHandler(this.cancelMergeRequestFormBtn_Click);
+			// 
 			// CreateMergeRequestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			this.ClientSize = new System.Drawing.Size(1045, 730);
+			this.Controls.Add(this.mergeRequestCreateLoading);
+			this.Controls.Add(this.cancelMergeRequestFormBtn);
 			this.Controls.Add(this.fileStatusList);
 			this.Controls.Add(this.diffViewer);
 			this.Controls.Add(this.targetBranchGroup);
 			this.Controls.Add(this.sourceBranchGroup);
 			this.Controls.Add(this.mergeRequestData);
 			this.Controls.Add(this.createMergeRequestBtn);
-			this.Controls.Add(this.mergeRequestCreateLoading);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
@@ -366,5 +395,6 @@
 		private GitUI.UserControls.RevisionGrid.LoadingControl mergeRequestCreateLoading;
 		private GitUI.Editor.FileViewer diffViewer;
 		private GitUI.FileStatusList fileStatusList;
+		private System.Windows.Forms.Button cancelMergeRequestFormBtn;
 	}
 }

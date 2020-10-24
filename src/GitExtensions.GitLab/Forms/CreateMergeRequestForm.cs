@@ -435,5 +435,10 @@
 			}
 		}
 		#endregion
+
+		private void cancelMergeRequestFormBtn_Click(object sender, EventArgs e)
+		{
+			Close();
+		}
 	}
 }

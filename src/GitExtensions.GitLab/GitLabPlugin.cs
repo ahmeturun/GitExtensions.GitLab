@@ -32,19 +32,21 @@ namespace GitExtensions.GitLab
 
 		public readonly StringSetting OAuthToken = new StringSetting("OAuth Token", "");
 		public readonly StringSetting GitLabHost = new StringSetting("GitLab (Enterprise) hostname","https://gitlab.com");
+		public readonly BoolSetting AskForMergeRequestAfterPush = new BoolSetting("Ask for merge request upon push to remote", false);
 		private readonly ArgumentString cmdInfo = new GitArgumentBuilder("status");
 		private RepoType? repoType = null;
 		private IGitUICommands currentGitUiCommands;
 
 		internal static GitLabPlugin Instance;
 		internal Client.Client GitLabClient { get; private set; }
+		internal bool AskForMergeRequestAfterPushValue { get; private set; }
 
 		public bool ConfigurationOk => !string.IsNullOrEmpty(OAuthToken.ValueOrDefault(Settings)) 
 			&& !string.IsNullOrEmpty(GitLabHost.ValueOrDefault(Settings));
 
 		public GitLabPlugin() : base(true)
 		{
-			SetNameAndDescription("GitLab Merge Request");
+			SetNameAndDescription("GitLab");
 			Icon = Resources.IconGitlab;
 			Translate();
 			if (Instance == null)
@@ -86,6 +88,7 @@ namespace GitExtensions.GitLab
 			GitLabClient = new Client.Client(
 				gitLabHostParsed,
 				Instance.OAuthToken.ValueOrDefault(Instance.Settings));
+			AskForMergeRequestAfterPushValue = AskForMergeRequestAfterPush.ValueOrDefault(Settings);
 		}
 
 		public override void Unregister(IGitUICommands gitUiCommands)
@@ -113,6 +116,7 @@ namespace GitExtensions.GitLab
 		{
 			yield return OAuthToken;
 			yield return GitLabHost;
+			yield return AskForMergeRequestAfterPush;
 		}
 
 		#region IRepositoryHostPlugin definitions

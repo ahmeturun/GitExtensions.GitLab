@@ -6,32 +6,33 @@
 	{
 		private static readonly GitLabPluginScript CreateMergeRequestPluginScript =
 			new GitLabPluginScript("Create Merge Request", $"plugin:{GitLabCreateMergeRequest.GitLabCreateMRDescription}");
-		private static readonly GitLabPluginScript CreateManageMergeRequestPluginScript =
-			new GitLabPluginScript("Manage Merge Requests", $"plugin:{GitLabManagePullRequests.GitLabManageMRDescription}");
 
 		static readonly private int FirstHotkeyCommandIdentifier = 10000; // Arbitrary choosen. GE by default starts at 9000 for it's own scripts.
 
 		public static void Initialize()
 		{
 			Clean();
-			AddNew(CreateMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateMergeRequestPluginScript.Command);
-			AddNew(CreateMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateMergeRequestPluginScript.Command, onEvent: GitUI.Script.ScriptEvent.AfterPush);
-			AddNew(CreateManageMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateManageMergeRequestPluginScript.Command);
+			AddNew(CreateMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateMergeRequestPluginScript.Command, onEvent: GitUI.Script.ScriptEvent.AfterPush, addToRevisionGridContextMenu: false);
+			AddNew(CreateMergeRequestPluginScript.Name, string.Empty, string.Empty, command: CreateMergeRequestPluginScript.Command, onEvent: GitUI.Script.ScriptEvent.ShowInUserMenuBar);
 		}
 
 		public static void Clean()
 		{
 			Remove(CreateMergeRequestPluginScript);
-			Remove(CreateManageMergeRequestPluginScript);
 		}
 
 		private static void Remove(GitLabPluginScript gitLabPluginScript)
 		{
 			var gitExtScriptList = GitUI.Script.ScriptManager.GetScripts();
-			var registeredPluginScript = gitExtScriptList.Where(item => item.Name == gitLabPluginScript.Name && item.Command == gitLabPluginScript.Command);
-			if(registeredPluginScript != null && registeredPluginScript.Any())
+			var currentRegisteredPluginScript = gitExtScriptList
+				.FirstOrDefault(item => item.Name == gitLabPluginScript.Name 
+					&& item.Command == gitLabPluginScript.Command);
+			while (currentRegisteredPluginScript != null)
 			{
-				registeredPluginScript.ForEach(script => gitExtScriptList.Remove(script));
+				gitExtScriptList.Remove(currentRegisteredPluginScript);
+				currentRegisteredPluginScript = gitExtScriptList
+				.FirstOrDefault(item => item.Name == gitLabPluginScript.Name
+					&& item.Command == gitLabPluginScript.Command);
 			}
 		}
 

@@ -7,6 +7,7 @@
 	using GitCommands;
 	using GitExtensions.GitLab.Forms;
 	using GitUI;
+	using GitUI.CommandsDialogs;
 	using GitUIPluginInterfaces;
 	using GitUIPluginInterfaces.RepositoryHosts;
 	using ResourceManager;
@@ -14,7 +15,7 @@
 	[Export(typeof(IGitPlugin))]
 	public class GitLabCreateMergeRequest : GitPluginBase
 	{
-		public static string GitLabCreateMRDescription = "gitlabcreatemergerequest";
+		public static string GitLabCreateMRDescription = "GitLab Create Merge Request";
 		public GitLabCreateMergeRequest() : base(false)
 		{
 			SetNameAndDescription(GitLabCreateMRDescription);
@@ -27,16 +28,51 @@
 
 		public override bool Execute(GitUIEventArgs args)
 		{
+			var showMergeRequestFormChecked = GitLabPlugin.Instance.AskForMergeRequestAfterPushValue;
+			if (args.OwnerForm is FormPush formPush && !formPush.ErrorOccurred)
+			{
+				if (showMergeRequestFormChecked)
+				{
+					// show confirmation dialog to confirm opening create merge request form
+					var createMergeRequestCheckResult = MessageBox.Show(
+						formPush,
+						$"Would you like to create a merge request?",
+						"GitLab Plugin",
+						MessageBoxButtons.YesNo,
+						MessageBoxIcon.Question);
+					if (createMergeRequestCheckResult == DialogResult.Yes)
+					{
+						return InitializeMergeRequestForm(args);
+					}
+					return false;
+				}
+				return false;
+			}
+			else if(args.OwnerForm is FormCreateTag
+				|| args.OwnerForm is FormDeleteRemoteBranch
+				|| args.OwnerForm is FormDeleteTag)
+			{
+				return false;
+			}
+			else
+			{
+				return InitializeMergeRequestForm(args);
+			}
+
+		}
+
+		private bool InitializeMergeRequestForm(GitUIEventArgs args)
+		{
 			if (!TryGetRepositoryHost(args.GitModule, args.OwnerForm, out var repoHostPlugin))
 			{
 				return false;
 			}
-			var revisionGridControl = (args.OwnerForm as GitModuleForm)?.RevisionGridControl 
+			var revisionGridControl = (args.OwnerForm as GitModuleForm)?.RevisionGridControl
 				?? args.OwnerForm as RevisionGridControl
 				?? ((args.OwnerForm as Form).Owner as GitUI.CommandsDialogs.FormBrowse)?.RevisionGridControl;
 
 			var mergeRequestForm = new CreateMergeRequestForm(
-				args.GitModule, 
+				args.GitModule,
 				repoHostPlugin,
 				revisionGridControl);
 			mergeRequestForm.ShowDialog(args.OwnerForm);
