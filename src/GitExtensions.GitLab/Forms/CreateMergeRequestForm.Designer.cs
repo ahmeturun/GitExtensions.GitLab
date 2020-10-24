@@ -50,6 +50,8 @@
 			this.targetProjectCB = new System.Windows.Forms.ComboBox();
 			this.targetProjectLbl = new System.Windows.Forms.Label();
 			this.mergeRequestCreateLoading = new GitUI.UserControls.RevisionGrid.LoadingControl();
+			this.diffViewer = new GitUI.Editor.FileViewer();
+			this.fileStatusList = new GitUI.FileStatusList();
 			this.mergeRequestData.SuspendLayout();
 			this.sourceBranchGroup.SuspendLayout();
 			this.targetBranchGroup.SuspendLayout();
@@ -64,6 +66,7 @@
 			this.sourceBranchCB.Name = "sourceBranchCB";
 			this.sourceBranchCB.Size = new System.Drawing.Size(229, 21);
 			this.sourceBranchCB.TabIndex = 0;
+			this.sourceBranchCB.SelectedIndexChanged += new System.EventHandler(this.branchCB_SelectedIndexChanged);
 			// 
 			// targetBranchCB
 			// 
@@ -73,6 +76,7 @@
 			this.targetBranchCB.Name = "targetBranchCB";
 			this.targetBranchCB.Size = new System.Drawing.Size(229, 21);
 			this.targetBranchCB.TabIndex = 1;
+			this.targetBranchCB.SelectedIndexChanged += new System.EventHandler(this.branchCB_SelectedIndexChanged);
 			// 
 			// sourceBranchLabel
 			// 
@@ -104,9 +108,6 @@
 			this.assigneeCB.Enter += new System.EventHandler(this.assigneeCB_Enter);
 			this.assigneeCB.KeyUp += new System.Windows.Forms.KeyEventHandler(this.assigneeCB_KeyUp);
 			this.assigneeCB.Leave += new System.EventHandler(this.assigneeCB_Leave);
-			this.assigneeCB.Click += AssigneeCB_Click;
-			this.assigneeCB.SelectedValueChanged += AssigneeCB_SelectedValueChanged;
-			this.assigneeCB.TextChanged += AssigneeCB_TextChanged;
 			// 
 			// assigneeLabel
 			// 
@@ -200,7 +201,6 @@
 			this.mergeRequestTitleTB.Name = "mergeRequestTitleTB";
 			this.mergeRequestTitleTB.Size = new System.Drawing.Size(600, 20);
 			this.mergeRequestTitleTB.TabIndex = 10;
-			this.mergeRequestTitleTB.TextChanged += MergeRequestTitleTB_TextChanged;
 			// 
 			// mergeRequestTitleLbl
 			// 
@@ -284,20 +284,40 @@
 			this.mergeRequestCreateLoading.IsAnimating = true;
 			this.mergeRequestCreateLoading.Location = new System.Drawing.Point(0, 0);
 			this.mergeRequestCreateLoading.Name = "mergeRequestCreateLoading";
-			this.mergeRequestCreateLoading.Size = new System.Drawing.Size(784, 421);
+			this.mergeRequestCreateLoading.Size = new System.Drawing.Size(784, 784);
 			this.mergeRequestCreateLoading.TabIndex = 12;
+			// 
+			// fileViewer1
+			// 
+			this.diffViewer.Location = new System.Drawing.Point(32, 502);
+			this.diffViewer.Margin = new System.Windows.Forms.Padding(0);
+			this.diffViewer.Name = "fileViewer1";
+			this.diffViewer.Size = new System.Drawing.Size(714, 273);
+			this.diffViewer.TabIndex = 13;
+			// 
+			// fileStatusList1
+			// 
+			this.fileStatusList.FilterVisible = true;
+			this.fileStatusList.GroupByRevision = false;
+			this.fileStatusList.Location = new System.Drawing.Point(32, 427);
+			this.fileStatusList.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+			this.fileStatusList.Name = "fileStatusList1";
+			this.fileStatusList.Size = new System.Drawing.Size(714, 71);
+			this.fileStatusList.TabIndex = 14;
 			// 
 			// CreateMergeRequestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			this.ClientSize = new System.Drawing.Size(784, 421);
-			this.Controls.Add(this.mergeRequestCreateLoading);
+			this.ClientSize = new System.Drawing.Size(784, 784);
+			this.Controls.Add(this.fileStatusList);
+			this.Controls.Add(this.diffViewer);
 			this.Controls.Add(this.targetBranchGroup);
 			this.Controls.Add(this.sourceBranchGroup);
 			this.Controls.Add(this.mergeRequestData);
 			this.Controls.Add(this.createMergeRequestBtn);
+			this.Controls.Add(this.mergeRequestCreateLoading);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
@@ -340,5 +360,7 @@
 		private System.Windows.Forms.Label mergeOptionsGroup;
 		private System.Windows.Forms.CheckBox deleteSourceBranchChkBox;
 		private GitUI.UserControls.RevisionGrid.LoadingControl mergeRequestCreateLoading;
+		private GitUI.Editor.FileViewer diffViewer;
+		private GitUI.FileStatusList fileStatusList;
 	}
 }

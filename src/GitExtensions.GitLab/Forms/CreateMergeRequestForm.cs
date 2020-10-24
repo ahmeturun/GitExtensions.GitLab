@@ -1,24 +1,21 @@
-﻿using GitCommands;
-using GitUI;
-using GitUIPluginInterfaces;
-using GitUIPluginInterfaces.RepositoryHosts;
-using ResourceManager;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.VisualStudio.Threading;
-using System.Drawing;
-using System.Threading;
-using GitExtensions.GitLab.Client.Repo;
-using System.Web;
-using GitUI.HelperDialogs;
-using GitUI.UserControls;
-using GitUI.Properties;
-
-namespace GitExtensions.GitLab.Forms
+﻿namespace GitExtensions.GitLab.Forms
 {
+	using GitCommands;
+	using GitUI;
+	using GitUIPluginInterfaces;
+	using GitUIPluginInterfaces.RepositoryHosts;
+	using ResourceManager;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Threading.Tasks;
+	using System.Windows.Forms;
+	using Microsoft.VisualStudio.Threading;
+	using System.Drawing;
+	using System.Threading;
+	using GitExtensions.GitLab.Client.Repo;
+	using GitUI.Properties;
+
 	public partial class CreateMergeRequestForm : GitExtensionsForm
 	{
 		#region Translation
@@ -29,6 +26,9 @@ namespace GitExtensions.GitLab.Forms
 		private readonly TranslationString mergeRequestCompleted = new TranslationString("Merge Request Created");
 		private readonly TranslationString mergeRequestError = new TranslationString("Merge Request Creation is Unsuccessfull");
 		private readonly TranslationString errorDetails = new TranslationString("Error details");
+		private readonly TranslationString strUnableUnderstandPatch = new TranslationString("Error: Unable to understand patch");
+		private readonly TranslationString error = new TranslationString("Error");
+		private readonly TranslationString strFailedToLoadDiffData = new TranslationString("Failed to load diff data!");
 		#endregion
 
 		private readonly IGitModule gitModule;
@@ -42,8 +42,8 @@ namespace GitExtensions.GitLab.Forms
 		private IReadOnlyList<IHostedRemote> hostedRemotes;
 		private User[] assigneeUserList;
 		private bool userSearchOngoing = false;
-		private CancellationToken userSearchCancellationToken;
-		private CancellationTokenSource userSearchCancellationTokenSource = new CancellationTokenSource();
+
+		private Dictionary<string, string> diffCache;
 
 		public CreateMergeRequestForm(
 			IGitModule gitModule,
@@ -63,10 +63,13 @@ namespace GitExtensions.GitLab.Forms
 			assigneeCB.Text = strUserSearch.Text;
 			mergeRequestCreateLoading.Visible = false;
 			mergeRequestCreateLoading.IsAnimating = false;
+			fileStatusList.UICommandsSource = revisionGridControl.UICommandsSource;
+			diffViewer.UICommandsSource = revisionGridControl.UICommandsSource;
 		}
 
 		private void CreateMergeRequestForm_Load(object sender, EventArgs e)
 		{
+			fileStatusList.SelectedIndexChanged += fileStatusList_SelectedIndexChanged;
 			createMergeRequestBtn.Enabled = false;
 			sourceBranchCB.Text = strLoading.Text;
 			hostedRemotes = repoHost.GetHostedRemotesForModule();
@@ -225,9 +228,6 @@ namespace GitExtensions.GitLab.Forms
 				return;
 			}
 			var searchText = assigneeCB.Text;
-			userSearchCancellationTokenSource.Cancel();
-			userSearchCancellationTokenSource = new CancellationTokenSource();
-			userSearchCancellationToken = userSearchCancellationTokenSource.Token;
 			userLoader.Cancel();
 			userLoader.LoadAsync(
 				(userSearchCancellationToken) =>
@@ -333,5 +333,107 @@ namespace GitExtensions.GitLab.Forms
 						e.Exception.Message).ShowDialog(this);
 			createMergeRequestBtn.Enabled = true;
 		}
+
+		#region merge request diff management
+		private void branchCB_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			diffViewer.Clear();
+			fileStatusList.ClearDiffs();
+			if (sourceBranchCB.SelectedItem == null || targetBranchCB.SelectedItem == null)
+			{
+				return;
+			}
+			LoadDiffPatch();
+		}
+
+		private void LoadDiffPatch()
+		{
+			ThreadHelper.JoinableTaskFactory.RunAsync(
+				async () =>
+				{
+					try
+					{
+						var sourceProject = sourceProjectCB.SelectedItem as GitLabHostedRemote;
+						var sourceBranch = sourceBranchCB.SelectedItem as IHostedBranch;
+						var targetBranch = targetBranchCB.SelectedItem as IHostedBranch;
+						var branchDiff = GetDiffData(
+							sourceProject.Id,
+							sourceBranch.Sha.ToString(),
+							targetBranch.Sha.ToString());
+
+						await this.SwitchToMainThreadAsync();
+
+						SplitAndLoadDiff(
+							branchDiff,
+							sourceBranch.Sha.ToString(),
+							targetBranch.Sha.ToString());
+					}
+					catch (Exception ex) when (!(ex is OperationCanceledException))
+					{
+						MessageBox.Show(this, strFailedToLoadDiffData.Text + Environment.NewLine + ex.Message, error.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+					}
+				})
+				.FileAndForget();
+		}
+
+		private BranchDiff GetDiffData(int projectId, string sourceId, string targetId)
+			=> GitLabPlugin.GitLabClient.GetBranchDiff(projectId, sourceId, targetId);
+
+		private void SplitAndLoadDiff(BranchDiff diffData, string baseSha, string secondSha)
+		{
+			diffCache = new Dictionary<string, string>();
+
+			var giss = new List<GitItemStatus>();
+			var firstRev = ObjectId.TryParse(baseSha, out var firstId)
+				? new GitRevision(firstId)
+				: null;
+			var secondRev = ObjectId.TryParse(secondSha, out var secondId)
+				? new GitRevision(secondId)
+				: null;
+			if (secondRev == null)
+			{
+				MessageBox.Show(this, strUnableUnderstandPatch.Text, error.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			foreach (var diff in diffData.Diffs)
+			{
+				var gis = new GitItemStatus {
+					IsChanged = true,
+					IsNew = diff.NewFile,
+					IsDeleted = diff.DeletedFile,
+					IsTracked = true,
+					Name = diff.NewPath,
+					Staged = StagedStatus.None
+				};
+
+				giss.Add(gis);
+				diffCache.Add(gis.Name, diff.DiffContent);
+			}
+
+			// Note: Commits in PR may not exist in the local repo
+			fileStatusList.SetDiffs(firstRev, secondRev, items: giss);
+		}
+
+		private void fileStatusList_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			var gis = fileStatusList.SelectedItem?.Item;
+			if (gis == null)
+			{
+				return;
+			}
+
+			var data = diffCache[gis.Name];
+
+			if (gis.IsSubmodule)
+			{
+				diffViewer.ViewText(gis.Name, text: data);
+			}
+			else
+			{
+				diffViewer.ViewFixedPatch(gis.Name, text: data);
+			}
+		}
+		#endregion
 	}
 }

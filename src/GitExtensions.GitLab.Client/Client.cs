@@ -33,7 +33,7 @@
 		{
 			var request = new RestRequest("/api/v4/user");
 
-			var user = DoRequest<User>(request, false);
+			var user = GetRequest<User>(request, false);
 
 			return user;
 		}
@@ -48,7 +48,7 @@
 			var request = new RestRequest("/api/v4/projects/{repo}")
 				.AddUrlSegment("repo", repositoryName);
 
-			var repo = DoRequest<Repository>(request);
+			var repo = GetRequest<Repository>(request);
 			if (repo == null)
 				return null;
 
@@ -62,7 +62,7 @@
 				? $"?search={searchKey}"
 				: string.Empty;
 			var request = new RestRequest($"/api/v4/users{searchFilter}");
-			var users = DoRequest<List<User>>(request);
+			var users = GetRequest<List<User>>(request);
 			return users;
 		}
 
@@ -74,7 +74,14 @@
 			return createdMergeRequest;
 		}
 
-		private T DoRequest<T>(IRestRequest request, bool throwOnError = true) where T : new()
+		public BranchDiff GetBranchDiff(int projectId, string sourceId, string targetId)
+		{
+			//https://gitlab.com/api/v4/projects/ahmeturun%2Ffork_test_path/repository/compare?from=master&to=merge_test?private_token=sgxDwASYHYxE15FhzVrk
+			var request = new RestRequest($"/api/v4/projects/{projectId}/repository/compare?from={targetId}&to={sourceId}");
+			return GetRequest<BranchDiff>(request);
+		}
+
+		private T GetRequest<T>(IRestRequest request, bool throwOnError = true) where T : new()
 		{
 			var response = client.Get<T>(request);
 			if (response.IsSuccessful)

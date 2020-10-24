@@ -31,7 +31,7 @@
 				args.GitModule, 
 				repoHostPlugin,
 				revisionGridControl);
-			mergeRequestForm.ShowDialog();
+			mergeRequestForm.ShowDialog(args.OwnerForm);
 			return false;
 		}
 
