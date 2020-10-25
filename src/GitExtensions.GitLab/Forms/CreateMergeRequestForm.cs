@@ -1,20 +1,19 @@
 ﻿namespace GitExtensions.GitLab.Forms
 {
-	using GitCommands;
-	using GitUI;
-	using GitUIPluginInterfaces;
-	using GitUIPluginInterfaces.RepositoryHosts;
-	using ResourceManager;
 	using System;
 	using System.Collections.Generic;
+	using System.Drawing;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using System.Windows.Forms;
-	using Microsoft.VisualStudio.Threading;
-	using System.Drawing;
-	using System.Threading;
+	using GitCommands;
 	using GitExtensions.GitLab.Client.Repo;
+	using GitUI;
 	using GitUI.Properties;
+	using GitUIPluginInterfaces;
+	using GitUIPluginInterfaces.RepositoryHosts;
+	using Microsoft.VisualStudio.Threading;
+	using ResourceManager;
 
 	public partial class CreateMergeRequestForm : GitExtensionsForm
 	{
@@ -32,7 +31,6 @@
 		#endregion
 
 		private readonly IGitModule gitModule;
-		private readonly IRepositoryHostPlugin repoHost;
 		private readonly RevisionGridControl RevisionGridControl;
 		private readonly AsyncLoader remoteLoader = new AsyncLoader();
 		private readonly AsyncLoader userLoader = new AsyncLoader
@@ -47,11 +45,9 @@
 
 		public CreateMergeRequestForm(
 			IGitModule gitModule,
-			IRepositoryHostPlugin repoHost,
 			RevisionGridControl revisionGridControl)
 		{
 			this.gitModule = gitModule ?? throw new ArgumentNullException(nameof(gitModule));
-			this.repoHost = repoHost ?? throw new ArgumentNullException(nameof(repoHost));
 			RevisionGridControl = revisionGridControl;
 			InitializeComponent();
 			InitializeComplete();
@@ -61,6 +57,7 @@
 			targetBranchCB.DisplayMember = nameof(IHostedBranch.Name);
 			assigneeCB.DisplayMember = nameof(Client.Repo.User.Name);
 			assigneeCB.Text = strUserSearch.Text;
+			assigneeCB.AutoCompleteMode = AutoCompleteMode.None;
 			mergeRequestCreateLoading.Visible = false;
 			mergeRequestCreateLoading.IsAnimating = false;
 			fileStatusList.UICommandsSource = revisionGridControl.UICommandsSource;
@@ -72,7 +69,7 @@
 			fileStatusList.SelectedIndexChanged += fileStatusList_SelectedIndexChanged;
 			createMergeRequestBtn.Enabled = false;
 			sourceBranchCB.Text = strLoading.Text;
-			hostedRemotes = repoHost.GetHostedRemotesForModule();
+			hostedRemotes = GitLabPlugin.Instance.GetHostedRemotesForModule();
 			// TODO: show mask for loading.
 			InitializeSources(hostedRemotes.Where(remote => remote.IsOwnedByMe).ToArray());
 			remoteLoader.LoadAsync(
@@ -126,7 +123,7 @@
 			var selectedRevision = RevisionGridControl?.GetSelectedRevisions();
 			if (selectedRevision?.Count == 1 && !selectedRevision[0].IsArtificial)
 			{
-				selectedBranch = selectedRevision[0].Refs[0].Name.Split('/')?.LastOrDefault() ?? selectedBranch;
+				selectedBranch = selectedRevision[0].Refs?.ElementAtOrDefault(0)?.Name?.Split('/')?.LastOrDefault() ?? selectedBranch;
 			}
 
 			PopulateBranchesComboAndEnableCreateButton(
@@ -245,6 +242,11 @@
 					assigneeCB.Items.Clear();
 					assigneeCB.Items.AddRange(users);
 					assigneeCB.DroppedDown = true;
+					var currentText = assigneeCB.Text;
+					assigneeCB.SelectedText = string.Empty;
+					assigneeCB.Text = currentText;
+					assigneeCB.SelectionStart = currentText.Length;
+					assigneeCB.Capture = false;
 					userSearchOngoing = false;
 				});
 		}

@@ -1,20 +1,21 @@
 ﻿namespace GitExtensions.GitLab
 {
-	using System;
 	using System.ComponentModel.Composition;
-	using System.Linq;
 	using System.Windows.Forms;
-	using GitCommands;
 	using GitExtensions.GitLab.Forms;
 	using GitUI;
 	using GitUI.CommandsDialogs;
 	using GitUIPluginInterfaces;
-	using GitUIPluginInterfaces.RepositoryHosts;
 	using ResourceManager;
 
 	[Export(typeof(IGitPlugin))]
 	public class GitLabCreateMergeRequest : GitPluginBase
 	{
+		#region Translation
+		private readonly TranslationString ErrorString = new TranslationString("Error");
+		private readonly TranslationString NoReposHostFound = new TranslationString("Could not find any relevant repository hosts for the currently open repository.");
+		#endregion
+
 		public static string GitLabCreateMRDescription = "GitLab Create Merge Request";
 		public GitLabCreateMergeRequest() : base(false)
 		{
@@ -63,39 +64,34 @@
 
 		private bool InitializeMergeRequestForm(GitUIEventArgs args)
 		{
-			if (!TryGetRepositoryHost(args.GitModule, args.OwnerForm, out var repoHostPlugin))
+			if (!CheckForGitModule(args.GitModule, args.OwnerForm))
 			{
 				return false;
 			}
 			var revisionGridControl = (args.OwnerForm as GitModuleForm)?.RevisionGridControl
 				?? args.OwnerForm as RevisionGridControl
-				?? ((args.OwnerForm as Form).Owner as GitUI.CommandsDialogs.FormBrowse)?.RevisionGridControl;
+				?? ((args.OwnerForm as Form).Owner as FormBrowse)?.RevisionGridControl;
 
 			var mergeRequestForm = new CreateMergeRequestForm(
 				args.GitModule,
-				repoHostPlugin,
 				revisionGridControl);
 			mergeRequestForm.ShowDialog(args.OwnerForm);
 			return false;
 		}
 
-		private bool TryGetRepositoryHost(IGitModule module, IWin32Window owner, out IRepositoryHostPlugin repoHost)
+		private bool CheckForGitModule(IGitModule module, IWin32Window owner)
 		{
 			if (!module.IsValidGitWorkingDir())
 			{
-				repoHost = null;
 				return false;
 			}
-			repoHost = PluginRegistry.GitHosters.FirstOrDefault(gitHosters => gitHosters.GitModuleIsRelevantToMe());
 
-			if (repoHost == null)
+			if (!GitLabPlugin.Instance.GitModuleIsRelevantToMe())
 			{
-				var errorString = new TranslationString("Error");
-				var noReposHostFound = new TranslationString("Could not find any relevant repository hosts for the currently open repository.");
 				MessageBox.Show(
 					owner,
-					noReposHostFound.Text,
-					errorString.Text,
+					NoReposHostFound.Text,
+					ErrorString.Text,
 					MessageBoxButtons.OK,
 					MessageBoxIcon.Error);
 				return false;

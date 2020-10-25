@@ -2,11 +2,9 @@
 using ResourceManager;
 using System;
 using System.ComponentModel.Composition;
-using System.Windows.Forms;
 using GitExtensions.GitLab.Properties;
 using GitUIPluginInterfaces.RepositoryHosts;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
 using GitUI;
 using GitExtUtils;
@@ -18,12 +16,8 @@ using GitUI.Properties;
 
 namespace GitExtensions.GitLab
 {
-	/// <summary>
-	/// A template for Git Extensions plugins.
-	/// Find more documentation here: https://github.com/gitextensions/gitextensions.plugintemplate/wiki/GitPluginBase
-	/// </summary>
 	[Export(typeof(IGitPlugin))]
-	public class GitLabPlugin : GitPluginBase, IRepositoryHostPlugin
+	public class GitLabPlugin : GitPluginBase
 	{
 		#region Translation
 		private readonly TranslationString authenticationError = new TranslationString("Authentication Failed.");
@@ -63,6 +57,7 @@ namespace GitExtensions.GitLab
 		{
 			currentGitUiCommands = gitUiCommands;;
 			currentGitUiCommands.PostSettings += CurrentGitUiCommands_PostSettings;
+			currentGitUiCommands.PostRegisterPlugin += GitUiCommands_PostRegisterPlugin;
 			InitializeConfiguredParameters();
 			if (ConfigurationOk && IsGitLabRepo(gitUiCommands))
 			{
@@ -75,6 +70,11 @@ namespace GitExtensions.GitLab
 				GitLabPluginScriptManager.Clean();
 				ForceRefreshGE(gitUiCommands);
 			}
+		}
+
+		private void GitUiCommands_PostRegisterPlugin(object sender, GitUIEventArgs e)
+		{
+			GitLabPluginScriptManager.CleanPluginToolstripMenuItems(e.OwnerForm);
 		}
 
 		private void CurrentGitUiCommands_PostSettings(object sender, GitUIPostActionEventArgs e)
@@ -118,47 +118,10 @@ namespace GitExtensions.GitLab
 			yield return GitLabHost;
 			yield return AskForMergeRequestAfterPush;
 		}
-
-		#region IRepositoryHostPlugin definitions
-
-		public string OwnerLogin => GitLabClient.GetCurrentUser()?.Username;
-
-		public IReadOnlyList<IHostedRepository> SearchForRepository(string search)
-		{
-			throw new NotImplementedException();
-		}
-
-		public IReadOnlyList<IHostedRepository> GetRepositoriesOfUser(string user)
-		{
-			throw new NotImplementedException();
-		}
-
-		public IHostedRepository GetRepository(string user, string repositoryName)
-		{
-			throw new NotImplementedException();
-		}
-
-		public IReadOnlyList<IHostedRepository> GetMyRepos()
-		{
-			throw new NotImplementedException();
-		}
-
-		public void ConfigureContextMenu(ContextMenuStrip contextMenu)
-		{
-			throw new NotImplementedException();
-		}
-
 		public bool GitModuleIsRelevantToMe()
 		{
 			return GetHostedRemotesForModule().Count > 0;
 		}
-
-		public Task<string> AddUpstreamRemoteAsync()
-		{
-			throw new NotImplementedException();
-		}
-
-		#endregion
 
 
 		private bool IsGitLabRepo(IGitUICommands gitUiCommands)
@@ -180,7 +143,7 @@ namespace GitExtensions.GitLab
 				new MergeRequsetFormStatus(
 						$"GitLab Plugin -{authenticationError.Text}",
 						string.Empty,
-						Images.StatusBadgeError,
+						 GitUI.Properties.Images.StatusBadgeError,
 						"Given private key is not valid.").ShowDialog();
 				return false;
 			}
@@ -189,7 +152,7 @@ namespace GitExtensions.GitLab
 				new MergeRequsetFormStatus(
 						$"GitLab Plugin -{repoInitializationError.Text}",
 						string.Empty,
-						Images.StatusBadgeError,
+						GitUI.Properties.Images.StatusBadgeError,
 						ex.Message).ShowDialog();
 				return false;
 			}
