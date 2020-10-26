@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionPrefix>1.0.2</VersionPrefix>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
