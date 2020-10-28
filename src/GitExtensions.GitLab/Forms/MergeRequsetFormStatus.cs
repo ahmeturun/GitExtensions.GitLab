@@ -11,16 +11,21 @@ namespace GitExtensions.GitLab.Forms
 	{
 		private readonly string mergeRequestLink;
 
+		public bool DontShowAgain { get; set; }
+
 		[Obsolete]
 		public MergeRequsetFormStatus() { }
 
-		public MergeRequsetFormStatus(string text, string mergeRequestLink, Bitmap dialogIcon, params string[] output) : base(null)
+		public MergeRequsetFormStatus(
+			string text,
+			string mergeRequestLink,
+			Bitmap dialogIcon,
+			bool isError,
+			params string[] output) : base(null)
 		{
 			this.mergeRequestLink = mergeRequestLink;
 			SetIcon(dialogIcon);
 			InitializeComponent();
-			//Ok.Focus();
-			//Ok.UseWaitCursor = false;
 			if (!string.IsNullOrEmpty(mergeRequestLink))
 			{
 				mergeRequestUrlLabel.Click += MergeRequestUrlLabel_Click;
@@ -28,12 +33,17 @@ namespace GitExtensions.GitLab.Forms
 				mergeRequestUrlLabel.Visible = true;
 			}
 			Text = text;
+			DontShowAgain = dontShowCheckBox.Checked;
 			if (output?.Length > 0)
 			{
 				foreach (string line in output)
 				{
 					AppendMessage(line, consoleOutputControl);
 				}
+			}
+			if (isError)
+			{
+				dontShowCheckBox.Visible = true;
 			}
 			InitializeComplete();
 		}
@@ -79,6 +89,11 @@ namespace GitExtensions.GitLab.Forms
 		{
 
 			consoleOutputControl.AppendMessageFreeThreaded(text);
+		}
+
+		private void dontShowCheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			DontShowAgain = dontShowCheckBox.Checked;
 		}
 	}
 }

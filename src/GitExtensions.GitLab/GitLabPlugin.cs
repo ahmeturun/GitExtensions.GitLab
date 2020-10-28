@@ -24,6 +24,8 @@ namespace GitExtensions.GitLab
 		private readonly TranslationString repoInitializationError = new TranslationString("Error on repo initialization.");
 		#endregion
 
+		private static bool dontShowErrors = false;
+
 		public readonly StringSetting OAuthToken = new StringSetting("OAuth Token", "");
 		public readonly StringSetting GitLabHost = new StringSetting("GitLab (Enterprise) hostname","https://gitlab.com");
 		public readonly BoolSetting AskForMergeRequestAfterPush = new BoolSetting("Ask for merge request upon push to remote", false);
@@ -140,20 +142,38 @@ namespace GitExtensions.GitLab
 			}
 			catch (UnauthorizedAccessException)
 			{
-				new MergeRequsetFormStatus(
+				if (dontShowErrors)
+				{
+					return false;
+				}
+				using (var mergeRequestformStatus = new MergeRequsetFormStatus(
 						$"GitLab Plugin -{authenticationError.Text}",
 						string.Empty,
 						 GitUI.Properties.Images.StatusBadgeError,
-						"Given private key is not valid.").ShowDialog();
+						 true,
+						"Given private key is not valid."))
+				{
+					mergeRequestformStatus.ShowDialog();
+					dontShowErrors = mergeRequestformStatus.DontShowAgain;
+				}
 				return false;
 			}
 			catch(Exception ex)
 			{
-				new MergeRequsetFormStatus(
+				if (dontShowErrors)
+				{
+					return false;
+				}
+				using (var mergeRequestformStatus = new MergeRequsetFormStatus(
 						$"GitLab Plugin -{repoInitializationError.Text}",
 						string.Empty,
 						GitUI.Properties.Images.StatusBadgeError,
-						ex.Message).ShowDialog();
+						true,
+						ex.Message))
+				{
+					mergeRequestformStatus.ShowDialog();
+					dontShowErrors = mergeRequestformStatus.DontShowAgain;
+				}
 				return false;
 			}
 

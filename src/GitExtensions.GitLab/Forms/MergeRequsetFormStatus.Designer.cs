@@ -28,25 +28,12 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.Ok = new System.Windows.Forms.Button();
 			this.consoleOutputControl = new GitUI.UserControls.EditboxBasedConsoleOutputControl();
 			this.mergeRequestUrlLabel = new System.Windows.Forms.LinkLabel();
+			this.OKBtn = new System.Windows.Forms.Button();
+			this.dontShowCheckBox = new System.Windows.Forms.CheckBox();
 			this.consoleOutputControl.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// Ok
-			// 
-			this.Ok.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			this.Ok.Cursor = System.Windows.Forms.Cursors.WaitCursor;
-			this.Ok.Location = new System.Drawing.Point(418, 224);
-			this.Ok.Name = "Ok";
-			this.Ok.Size = new System.Drawing.Size(118, 25);
-			this.Ok.TabIndex = 0;
-			this.Ok.Text = "OK";
-			this.Ok.UseCompatibleTextRendering = true;
-			this.Ok.UseVisualStyleBackColor = true;
-			this.Ok.UseWaitCursor = true;
-			this.Ok.Click += new System.EventHandler(this.Ok_Click);
 			// 
 			// consoleOutputControl
 			// 
@@ -70,13 +57,35 @@
 			this.mergeRequestUrlLabel.UseWaitCursor = true;
 			this.mergeRequestUrlLabel.Visible = false;
 			// 
+			// OKBtn
+			// 
+			this.OKBtn.Location = new System.Drawing.Point(457, 228);
+			this.OKBtn.Name = "OKBtn";
+			this.OKBtn.Size = new System.Drawing.Size(75, 23);
+			this.OKBtn.TabIndex = 1;
+			this.OKBtn.Text = "Ok";
+			this.OKBtn.UseVisualStyleBackColor = true;
+			this.OKBtn.Click += new System.EventHandler(this.Ok_Click);
+			// 
+			// dontShowCheckBox
+			// 
+			this.dontShowCheckBox.AutoSize = true;
+			this.dontShowCheckBox.Location = new System.Drawing.Point(324, 232);
+			this.dontShowCheckBox.Name = "dontShowCheckBox";
+			this.dontShowCheckBox.Size = new System.Drawing.Size(108, 17);
+			this.dontShowCheckBox.TabIndex = 2;
+			this.dontShowCheckBox.Text = "Don\'t show again";
+			this.dontShowCheckBox.UseVisualStyleBackColor = true;
+			this.dontShowCheckBox.Visible = false;
+			this.dontShowCheckBox.CheckedChanged += new System.EventHandler(this.dontShowCheckBox_CheckedChanged);
+			// 
 			// MergeRequsetFormStatus
 			// 
-			this.AcceptButton = this.Ok;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.ClientSize = new System.Drawing.Size(549, 263);
-			this.Controls.Add(this.Ok);
+			this.Controls.Add(this.dontShowCheckBox);
+			this.Controls.Add(this.OKBtn);
 			this.Controls.Add(this.consoleOutputControl);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
@@ -86,13 +95,15 @@
 			this.consoleOutputControl.ResumeLayout(false);
 			this.consoleOutputControl.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
 		#endregion
-		private System.Windows.Forms.Button Ok;
 		protected internal System.Windows.Forms.FlowLayoutPanel ControlsPanel;
 		private GitUI.UserControls.EditboxBasedConsoleOutputControl consoleOutputControl;
 		private System.Windows.Forms.LinkLabel mergeRequestUrlLabel;
+		private System.Windows.Forms.Button OKBtn;
+		private System.Windows.Forms.CheckBox dontShowCheckBox;
 	}
 }

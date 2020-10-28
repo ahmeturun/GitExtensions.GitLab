@@ -317,6 +317,7 @@
 						mergeRequestCompleted.Text,
 						createdMergeRequest.WebUrl,
 						Images.StatusBadgeSuccess,
+						false,
 						"Merge request created.").ShowDialog(this);
 					Close();
 				});
@@ -327,12 +328,17 @@
 			mergeRequestCreateLoading.Visible = false;
 			mergeRequestCreateLoading.IsAnimating = false;
 
-			new MergeRequsetFormStatus(
+			using (var errorForm = new MergeRequsetFormStatus(
 						mergeRequestError.Text,
 						string.Empty,
 						Images.StatusBadgeError,
+						true,
 						errorDetails.Text,
-						e.Exception.Message).ShowDialog(this);
+						e.Exception.Message))
+			{
+				errorForm.ShowDialog(this);
+			}
+
 			createMergeRequestBtn.Enabled = true;
 		}
 
