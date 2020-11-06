@@ -1,21 +1,21 @@
-﻿using GitUIPluginInterfaces;
-using ResourceManager;
-using System;
-using System.ComponentModel.Composition;
-using GitExtensions.GitLab.Properties;
-using GitUIPluginInterfaces.RepositoryHosts;
-using System.Collections.Generic;
-using System.Linq;
-using GitExtUtils;
-using GitCommands;
-using GitCommands.Config;
-using GitExtensions.GitLab.Remote;
-using GitExtensions.GitLab.Forms;
-using System.Threading.Tasks;
-using System.Diagnostics;
-
-namespace GitExtensions.GitLab
+﻿namespace GitExtensions.GitLab
 {
+	using GitUIPluginInterfaces;
+	using ResourceManager;
+	using System;
+	using System.ComponentModel.Composition;
+	using GitExtensions.GitLab.Properties;
+	using GitUIPluginInterfaces.RepositoryHosts;
+	using System.Collections.Generic;
+	using System.Linq;
+	using GitExtUtils;
+	using GitCommands;
+	using GitCommands.Config;
+	using GitExtensions.GitLab.Remote;
+	using GitExtensions.GitLab.Forms;
+	using System.Diagnostics;
+	using System.Windows.Forms;
+
 	[Export(typeof(IGitPlugin))]
 	public class GitLabPlugin : GitPluginBase
 	{
@@ -94,11 +94,7 @@ namespace GitExtensions.GitLab
 
 		public override void Unregister(IGitUICommands gitUiCommands)
 		{
-			if (IsGitLabRepo(gitUiCommands))
-			{
-				GitLabPluginScriptManager.Clean();
-			}
-
+			GitLabPluginScriptManager.Clean();
 			repoType = null;
 		}
 
@@ -145,29 +141,7 @@ namespace GitExtensions.GitLab
 				{
 					return false;
 				}
-				using (var confirmRedirectForm = new RedirectToGitLabLoginForm())
-				{
-					confirmRedirectForm.ShowDialog();
-					dontAskForLoginAgain = confirmRedirectForm.dontAskForLoginAgain;
-					if(confirmRedirectForm.DialogResult == System.Windows.Forms.DialogResult.OK)
-					{
-						Process.Start(GitLabClient.OAuthredirectURL);
-						var oAuthTask = new AsyncLoader();
-						oAuthTask.LoadAsync(() =>
-						{
-							return new OAuthTokenRetriever().ServerThread();
-						}, oAuthToken =>
-						{
-							Instance.Settings.SetString(OAuthToken.Name, oAuthToken);
-						});
-						return false;
-					}
-					else
-					{
-						return false;
-					}
-				}
-
+				return LoginGitLab(true);
 			}
 			catch(Exception ex)
 			{
@@ -233,6 +207,53 @@ namespace GitExtensions.GitLab
 			}
 		}
 
+		public bool LoginGitLab(bool confirmRedirect)
+		{
+			if (!confirmRedirect)
+			{
+				return StartLoginProcess();
+			}
+			else
+			{
+				using (var confirmRedirectForm = new RedirectToGitLabLoginForm())
+				{
+					confirmRedirectForm.ShowDialog();
+					dontAskForLoginAgain = confirmRedirectForm.dontAskForLoginAgain;
+					if (confirmRedirectForm.DialogResult == DialogResult.OK)
+					{
+						return StartLoginProcess();
+					}
+					else
+					{
+						return false;
+					}
+				}
+			}
+		}
 
+		private bool StartLoginProcess()
+		{
+			Process.Start(GitLabClient.OAuthredirectURL);
+			var oAuthTask = new AsyncLoader();
+			oAuthTask.LoadAsync(() =>
+			{
+				return new OAuthTokenRetriever().ServerThread();
+			}, loginResult =>
+			{
+				if (loginResult.LoginSuccessFull)
+				{
+					Instance.Settings.SetString(OAuthToken.Name, loginResult.OAuthToken);
+					Register(currentGitUiCommands);
+				}
+				else
+				{
+					if (loginResult.TryAgain)
+					{
+						LoginGitLab(false);
+					}
+				}
+			});
+			return false;
+		}
 	}
 }

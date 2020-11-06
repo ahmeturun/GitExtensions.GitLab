@@ -10,7 +10,6 @@
 
 		static void Main(string[] args)
 		{
-			System.Diagnostics.Debugger.Launch();
 			if (args.Length > 0)
 			{
 				var pipeClient =
@@ -19,7 +18,7 @@
 						TokenImpersonationLevel.Impersonation);
 				try
 				{
-					pipeClient.Connect(120000);
+					pipeClient.Connect(10000);
 
 					var ss = new StreamString(pipeClient);
 					var token = Regex.Match(args[0], TokenRegex).Groups[1].Value;
