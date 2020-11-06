@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Net;
 	using System.Net.Http;
+	using System.Threading.Tasks;
 	using GitExtensions.GitLab.Client.Repo;
 	using RestSharp;
 
@@ -11,6 +12,7 @@
 	public class Client
 	{
 		private const string AuthenticationSchema = "Bearer";
+		private const string GitLabOAuthClientId = "4c720c2b1df2547b7c661ba8328d0a0713765aad5f7ee6a023a8a6ae24c1013a";
 		private readonly HttpClient httpClient;
 		private readonly IRestClient client;
 		private readonly string gitLabDomain = "https://gitlab.net";
@@ -79,6 +81,9 @@
 			var request = new RestRequest($"/api/v4/projects/{projectId}/repository/compare?from={targetId}&to={sourceId}");
 			return GetRequest<BranchDiff>(request);
 		}
+
+		public string OAuthredirectURL => $"{gitLabDomain}/oauth/authorize?client_id=" +
+			$"{GitLabOAuthClientId}&redirect_uri=gitextensionsgitlab://auth&response_type=token";
 
 		private T GetRequest<T>(IRestRequest request, bool throwOnError = true) where T : new()
 		{

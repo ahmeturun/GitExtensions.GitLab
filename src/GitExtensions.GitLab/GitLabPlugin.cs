@@ -6,13 +6,13 @@ using GitExtensions.GitLab.Properties;
 using GitUIPluginInterfaces.RepositoryHosts;
 using System.Collections.Generic;
 using System.Linq;
-using GitUI;
 using GitExtUtils;
 using GitCommands;
 using GitCommands.Config;
 using GitExtensions.GitLab.Remote;
 using GitExtensions.GitLab.Forms;
-using GitUI.Properties;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace GitExtensions.GitLab
 {
@@ -25,6 +25,7 @@ namespace GitExtensions.GitLab
 		#endregion
 
 		private static bool dontShowErrors = false;
+		private static bool dontAskForLoginAgain = false;
 
 		public readonly StringSetting OAuthToken = new StringSetting("OAuth Token", "");
 		public readonly StringSetting GitLabHost = new StringSetting("GitLab (Enterprise) hostname","https://gitlab.com");
@@ -36,9 +37,6 @@ namespace GitExtensions.GitLab
 		internal static GitLabPlugin Instance;
 		internal Client.Client GitLabClient { get; private set; }
 		internal bool AskForMergeRequestAfterPushValue { get; private set; }
-
-		public bool ConfigurationOk => !string.IsNullOrEmpty(OAuthToken.ValueOrDefault(Settings)) 
-			&& !string.IsNullOrEmpty(GitLabHost.ValueOrDefault(Settings));
 
 		public GitLabPlugin() : base(true)
 		{
@@ -57,11 +55,12 @@ namespace GitExtensions.GitLab
 		/// </summary>
 		public override void Register(IGitUICommands gitUiCommands)
 		{
+			OAuth2Handler.RegisterURIHandler();
 			currentGitUiCommands = gitUiCommands;;
 			currentGitUiCommands.PostSettings += CurrentGitUiCommands_PostSettings;
 			currentGitUiCommands.PostRegisterPlugin += GitUiCommands_PostRegisterPlugin;
 			InitializeConfiguredParameters();
-			if (ConfigurationOk && IsGitLabRepo(gitUiCommands))
+			if (IsGitLabRepo(gitUiCommands))
 			{
 				base.Register(gitUiCommands);
 				GitLabPluginScriptManager.Initialize();
@@ -142,21 +141,33 @@ namespace GitExtensions.GitLab
 			}
 			catch (UnauthorizedAccessException)
 			{
-				if (dontShowErrors)
+				if (dontAskForLoginAgain)
 				{
 					return false;
 				}
-				using (var mergeRequestformStatus = new MergeRequsetFormStatus(
-						$"GitLab Plugin -{authenticationError.Text}",
-						string.Empty,
-						 GitUI.Properties.Images.StatusBadgeError,
-						 true,
-						"Given private key is not valid."))
+				using (var confirmRedirectForm = new RedirectToGitLabLoginForm())
 				{
-					mergeRequestformStatus.ShowDialog();
-					dontShowErrors = mergeRequestformStatus.DontShowAgain;
+					confirmRedirectForm.ShowDialog();
+					dontAskForLoginAgain = confirmRedirectForm.dontAskForLoginAgain;
+					if(confirmRedirectForm.DialogResult == System.Windows.Forms.DialogResult.OK)
+					{
+						Process.Start(GitLabClient.OAuthredirectURL);
+						var oAuthTask = new AsyncLoader();
+						oAuthTask.LoadAsync(() =>
+						{
+							return new OAuthTokenRetriever().ServerThread();
+						}, oAuthToken =>
+						{
+							Instance.Settings.SetString(OAuthToken.Name, oAuthToken);
+						});
+						return false;
+					}
+					else
+					{
+						return false;
+					}
 				}
-				return false;
+
 			}
 			catch(Exception ex)
 			{
