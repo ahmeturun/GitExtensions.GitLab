@@ -13,13 +13,6 @@
 			try
 			{
 				pipeServer = new NamedPipeServerStream("GitExtensionsGitlab", PipeDirection.InOut, 1);
-			}
-			catch (System.IO.IOException)
-			{
-			}
-
-			try
-			{
 				var pipeResult = pipeServer.WaitForConnectionAsync();
 				pipeResult.WithTimeout(TimeSpan.FromSeconds(60)).AttachToParent();
 				pipeResult.ConfigureAwait(false).GetAwaiter().GetResult();
@@ -31,9 +24,13 @@
 				var oAuthToken = ss.ReadString();
 				return new OAuthLoginResult(true, false, oAuthToken);
 			}
+			catch (System.IO.IOException)
+			{
+				// and existing login is ongoing, skipping
+				return new OAuthLoginResult(false, false, string.Empty);
+			}
 			catch (Exception)
 			{
-				pipeServer?.Close();
 				return ShowUnsuccessfullDialog();
 			}
 			finally

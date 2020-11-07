@@ -26,7 +26,7 @@ namespace GitExtensions.GitLab.Forms
 
 		private void dontAskAgainCheckBox_CheckedChanged(object sender, EventArgs e)
 		{
-
+			dontAskForLoginAgain = dontAskAgainCheckBox.Checked;
 		}
 
 		private void cancelButton_Click(object sender, EventArgs e)
