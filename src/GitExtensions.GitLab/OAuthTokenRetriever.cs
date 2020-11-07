@@ -16,8 +16,6 @@
 			}
 			catch (System.IO.IOException)
 			{
-				pipeServer.Close();
-				pipeServer = new NamedPipeServerStream("GitExtensionsGitlab", PipeDirection.InOut, 1);
 			}
 
 			try

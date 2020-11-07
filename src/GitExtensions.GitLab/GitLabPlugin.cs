@@ -24,11 +24,12 @@
 		private readonly TranslationString repoInitializationError = new TranslationString("Error on repo initialization.");
 		#endregion
 
+		private const string DefaultGitLabHost = "gitlab.com";
+
 		private static bool dontShowErrors = false;
 		private static bool dontAskForLoginAgain = false;
 
 		public readonly StringSetting OAuthToken = new StringSetting("OAuth Token", "");
-		public readonly StringSetting GitLabHost = new StringSetting("GitLab (Enterprise) hostname","https://gitlab.com");
 		public readonly BoolSetting AskForMergeRequestAfterPush = new BoolSetting("Ask for merge request upon push to remote", false);
 		private readonly ArgumentString cmdInfo = new GitArgumentBuilder("status");
 		private RepoType? repoType = null;
@@ -59,7 +60,7 @@
 			currentGitUiCommands = gitUiCommands;;
 			currentGitUiCommands.PostSettings += CurrentGitUiCommands_PostSettings;
 			currentGitUiCommands.PostRegisterPlugin += GitUiCommands_PostRegisterPlugin;
-			InitializeConfiguredParameters();
+			InitializeConfiguredParameters(gitUiCommands.GitModule);
 			if (IsGitLabRepo(gitUiCommands))
 			{
 				base.Register(gitUiCommands);
@@ -83,9 +84,12 @@
 			Register(currentGitUiCommands);
 		}
 
-		private void InitializeConfiguredParameters()
+		private void InitializeConfiguredParameters(IGitModule gitModule)
 		{
-			var gitLabHostParsed = $"https://{GitLabHost.ValueOrDefault(Settings).Replace("https://", "").Replace("http://", "").Trim('/')}";
+			var firstRemoteName = gitModule.GetRemoteNames().FirstOrDefault();
+			var url = gitModule.GetSetting(string.Format(SettingKeyString.RemoteUrl, firstRemoteName));
+			var remoteHost = !string.IsNullOrEmpty(url) ? new Uri(url).Host : DefaultGitLabHost;
+			var gitLabHostParsed = $"https://{remoteHost}";
 			GitLabClient = new Client.Client(
 				gitLabHostParsed,
 				Instance.OAuthToken.ValueOrDefault(Instance.Settings));
@@ -112,7 +116,6 @@
 		public override IEnumerable<ISetting> GetSettings()
 		{
 			yield return OAuthToken;
-			yield return GitLabHost;
 			yield return AskForMergeRequestAfterPush;
 		}
 		public bool GitModuleIsRelevantToMe()
@@ -180,20 +183,20 @@
 			IEnumerable<IHostedRemote> Remotes()
 			{
 				var set = new HashSet<IHostedRemote>();
-				var gitlabDomain = GitLabHost.ValueOrDefault(Settings)
-					.Replace("https://", "")
-					.Replace("http://", "")
-					.Trim('/');
 				foreach (string remote in gitModule.GetRemoteNames())
 				{
 					var url = gitModule.GetSetting(string.Format(SettingKeyString.RemoteUrl, remote));
-
 					if (string.IsNullOrEmpty(url))
 					{
 						continue;
 					}
+					var remoteUri = new Uri(url);
+					if (!remoteUri.Host.Contains("gitlab"))
+					{
+						continue;
+					}
 
-					if (new GitLabRemoteParser(gitlabDomain)
+					if (new GitLabRemoteParser(remoteUri.Host)
 							.TryExtractGitLabDataFromRemoteUrl(url, out var owner, out var repository))
 					{
 						var hostedRemote = new GitLabHostedRemote(remote, owner, repository, url);
