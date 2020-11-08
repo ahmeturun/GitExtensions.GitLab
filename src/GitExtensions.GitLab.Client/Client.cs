@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Net;
 	using System.Net.Http;
-	using System.Threading.Tasks;
 	using GitExtensions.GitLab.Client.Repo;
 	using RestSharp;
 
@@ -26,11 +25,17 @@
 			client.AddDefaultHeader(HttpRequestHeader.Authorization.ToString(), $"{AuthenticationSchema} {oAuthToken}");
 		}
 
-		/// <summary>
-		/// Retrieves the current user.
-		/// Requires to be logged in (OAuth).
-		/// </summary>
-		/// <returns>current user</returns>
+		public LoginResult Login(
+			string userName,
+			string password)
+		{
+			var request = new RestRequest("/oauth/token")
+				.AddJsonBody(new LoginRequest(userName, password));
+			var result = PostRequest<LoginResult>(request);
+			return result;
+		}
+
+
 		public User GetCurrentUser()
 		{
 			var request = new RestRequest("/api/v4/user");
@@ -40,11 +45,6 @@
 			return user;
 		}
 
-		/// <summary>
-		/// Fetches a single repository from github.com/username/repositoryName.
-		/// </summary>
-		/// <param name="repositoryName">name of the repository</param>
-		/// <returns>fetched repository</returns>
 		public Repository GetRepository(string repositoryName)
 		{
 			var request = new RestRequest("/api/v4/projects/{repo}")
@@ -77,7 +77,6 @@
 
 		public BranchDiff GetBranchDiff(int projectId, string sourceId, string targetId)
 		{
-			//https://gitlab.com/api/v4/projects/ahmeturun%2Ffork_test_path/repository/compare?from=master&to=merge_test?private_token=sgxDwASYHYxE15FhzVrk
 			var request = new RestRequest($"/api/v4/projects/{projectId}/repository/compare?from={targetId}&to={sourceId}");
 			return GetRequest<BranchDiff>(request);
 		}

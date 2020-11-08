@@ -33,11 +33,12 @@
 				FieldInfo fi = typeof(FormBrowse).GetField("pluginsToolStripMenuItem", BindingFlags.NonPublic | BindingFlags.Instance);
 				if (fi.GetValue(formBrowse) is ToolStripMenuItem toolStripMenuItem && toolStripMenuItem != null)
 				{
-					foreach (ToolStripMenuItem item in toolStripMenuItem.DropDownItems)
+					foreach (var item in toolStripMenuItem.DropDownItems)
 					{
-						if(item.Text == GitLabCreateMergeRequest.GitLabCreateMRDescription)
+						var toolStripItem = item as ToolStripMenuItem;
+						if(toolStripItem != null && toolStripItem.Text == GitLabCreateMergeRequest.GitLabCreateMRDescription)
 						{
-							toolStripMenuItem.DropDownItems.Remove(item);
+							toolStripMenuItem.DropDownItems.Remove(toolStripItem);
 							break;
 						}
 					}

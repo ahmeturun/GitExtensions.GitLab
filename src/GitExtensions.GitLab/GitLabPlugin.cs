@@ -13,8 +13,6 @@
 	using GitCommands.Config;
 	using GitExtensions.GitLab.Remote;
 	using GitExtensions.GitLab.Forms;
-	using System.Diagnostics;
-	using System.Windows.Forms;
 
 	[Export(typeof(IGitPlugin))]
 	public class GitLabPlugin : GitPluginBase
@@ -27,8 +25,9 @@
 		private const string DefaultGitLabHost = "gitlab.com";
 
 		private static bool dontShowErrors = false;
-		private static bool dontAskForLoginAgain = false;
+		//private static bool dontAskForLoginAgain = false;
 
+		public bool LoggedIn = false;
 		public readonly StringSetting OAuthToken = new StringSetting("OAuth Token", "");
 		public readonly BoolSetting AskForMergeRequestAfterPush = new BoolSetting("Ask for merge request upon push to remote", false);
 		private readonly ArgumentString cmdInfo = new GitArgumentBuilder("status");
@@ -56,7 +55,7 @@
 		/// </summary>
 		public override void Register(IGitUICommands gitUiCommands)
 		{
-			OAuth2Handler.RegisterURIHandler();
+			//OAuth2Handler.RegisterURIHandler();
 			currentGitUiCommands = gitUiCommands;;
 			currentGitUiCommands.PostSettings += CurrentGitUiCommands_PostSettings;
 			currentGitUiCommands.PostRegisterPlugin += GitUiCommands_PostRegisterPlugin;
@@ -140,11 +139,11 @@
 			}
 			catch (UnauthorizedAccessException)
 			{
-				if (dontAskForLoginAgain)
-				{
-					return false;
-				}
-				return LoginGitLab(true);
+				//if (dontAskForLoginAgain)
+				//{
+				//	return false;
+				//}
+				return LoginGitLab();
 			}
 			catch(Exception ex)
 			{
@@ -210,53 +209,65 @@
 			}
 		}
 
-		public bool LoginGitLab(bool confirmRedirect)
+		public bool LoginGitLab()
 		{
-			if (!confirmRedirect)
-			{
-				return StartLoginProcess();
-			}
-			else
-			{
-				using (var confirmRedirectForm = new RedirectToGitLabLoginForm())
-				{
-					confirmRedirectForm.ShowDialog();
-					dontAskForLoginAgain = confirmRedirectForm.dontAskForLoginAgain;
-					if (confirmRedirectForm.DialogResult == DialogResult.OK)
-					{
-						return StartLoginProcess();
-					}
-					else
-					{
-						return false;
-					}
-				}
-			}
+			return StartLoginProcess();
+			
+			//if (!confirmRedirect)
+			//{
+			//	return StartLoginProcess();
+			//}
+			//else
+			//{
+			//	using (var confirmRedirectForm = new RedirectToGitLabLoginForm())
+			//	{
+			//		confirmRedirectForm.ShowDialog();
+			//		dontAskForLoginAgain = confirmRedirectForm.dontAskForLoginAgain;
+			//		if (confirmRedirectForm.DialogResult == DialogResult.OK)
+			//		{
+			//			return StartLoginProcess();
+			//		}
+			//		else
+			//		{
+			//			return false;
+			//		}
+			//	}
+			//}
 		}
 
 		private bool StartLoginProcess()
 		{
-			Process.Start(GitLabClient.OAuthredirectURL);
-			var oAuthTask = new AsyncLoader();
-			oAuthTask.LoadAsync(() =>
+			using (var loginForm = new LoginForm())
 			{
-				return new OAuthTokenRetriever().ServerThread();
-			}, loginResult =>
-			{
-				if (loginResult.LoginSuccessFull)
-				{
-					Instance.Settings.SetString(OAuthToken.Name, loginResult.OAuthToken);
-					Register(currentGitUiCommands);
-				}
-				else
-				{
-					if (loginResult.TryAgain)
-					{
-						LoginGitLab(false);
-					}
-				}
-			});
-			return false;
+				loginForm.ShowDialog();
+			}
+
+			//Process.Start(GitLabClient.OAuthredirectURL);
+			//var oAuthTask = new AsyncLoader();
+			//oAuthTask.LoadAsync(() =>
+			//{
+			//	return new OAuthTokenRetriever().ServerThread();
+			//}, loginResult =>
+			//{
+			//	if (loginResult.LoginSuccessFull)
+			//	{
+			//		Instance.Settings.SetString(OAuthToken.Name, loginResult.OAuthToken);
+			//		Register(currentGitUiCommands);
+			//	}
+			//	else
+			//	{
+			//		if (loginResult.TryAgain)
+			//		{
+			//			LoginGitLab(false);
+			//		}
+			//	}
+			//});
+			return LoggedIn;
+		}
+
+		private void LoginForm_LoggedIn(object sender, LoginForm.LoggedInEventArgs e)
+		{
+			Register(e.GitUICommands);
 		}
 	}
 }

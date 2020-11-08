@@ -9,7 +9,9 @@
 	{
 		public static void RegisterURIHandler()
 		{
-			var oAuthProcessLocation = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "Plugins/GitExtensions.OAuthProcesses.exe");
+			var pluginAssemblylocation = System.Reflection.Assembly.GetAssembly(typeof(GitLabPlugin)).Location;
+			var pluginDllFileInfo = new FileInfo(pluginAssemblylocation);
+			var oAuthProcessLocation = Path.Combine(pluginDllFileInfo.Directory.FullName, "GitExtensions.OAuthProcesses.exe");
 			EnsureKeyExists(Registry.CurrentUser, "Software/Classes/gitextensionsgitlab", "GitExtensions GitLab Plugin");
 			SetValue(Registry.CurrentUser, "Software/Classes/gitextensionsgitlab", "URL Protocol", string.Empty);
 			EnsureKeyExists(Registry.CurrentUser, "Software/Classes/gitextensionsgitlab/DefaultIcon", $"{oAuthProcessLocation},1");
