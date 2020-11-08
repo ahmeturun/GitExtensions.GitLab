@@ -29,28 +29,38 @@
 		private void InitializeComponent()
 		{
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.loadingControl1 = new GitUI.UserControls.RevisionGrid.LoadingControl();
 			this.loginButton = new System.Windows.Forms.Button();
 			this.passwordLabel = new System.Windows.Forms.Label();
 			this.usernameLabel = new System.Windows.Forms.Label();
 			this.passwordTextbox = new System.Windows.Forms.TextBox();
 			this.usernameTextBox = new System.Windows.Forms.TextBox();
-			this.loadingControl1 = new GitUI.UserControls.RevisionGrid.LoadingControl();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Controls.Add(this.loadingControl1);
 			this.groupBox1.Controls.Add(this.loginButton);
 			this.groupBox1.Controls.Add(this.passwordLabel);
 			this.groupBox1.Controls.Add(this.usernameLabel);
 			this.groupBox1.Controls.Add(this.passwordTextbox);
 			this.groupBox1.Controls.Add(this.usernameTextBox);
+			this.groupBox1.Controls.Add(this.loadingControl1);
 			this.groupBox1.Location = new System.Drawing.Point(12, 12);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(265, 168);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
+			// 
+			// loadingControl1
+			// 
+			this.loadingControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.loadingControl1.IsAnimating = true;
+			this.loadingControl1.Location = new System.Drawing.Point(3, 16);
+			this.loadingControl1.Name = "loadingControl1";
+			this.loadingControl1.Size = new System.Drawing.Size(259, 149);
+			this.loadingControl1.TabIndex = 5;
+			this.loadingControl1.Visible = false;
 			// 
 			// loginButton
 			// 
@@ -90,6 +100,7 @@
 			this.passwordTextbox.Name = "passwordTextbox";
 			this.passwordTextbox.Size = new System.Drawing.Size(251, 23);
 			this.passwordTextbox.TabIndex = 1;
+			this.passwordTextbox.UseSystemPasswordChar = true;
 			// 
 			// usernameTextBox
 			// 
@@ -98,16 +109,6 @@
 			this.usernameTextBox.Name = "usernameTextBox";
 			this.usernameTextBox.Size = new System.Drawing.Size(251, 23);
 			this.usernameTextBox.TabIndex = 0;
-			// 
-			// loadingControl1
-			// 
-			this.loadingControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.loadingControl1.IsAnimating = true;
-			this.loadingControl1.Location = new System.Drawing.Point(3, 16);
-			this.loadingControl1.Name = "loadingControl1";
-			this.loadingControl1.Size = new System.Drawing.Size(259, 149);
-			this.loadingControl1.TabIndex = 5;
-			this.loadingControl1.Visible = false;
 			// 
 			// LoginForm
 			// 
@@ -118,6 +119,7 @@
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "LoginForm";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "GitLab Login";
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();

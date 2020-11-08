@@ -83,7 +83,7 @@
 			Register(currentGitUiCommands);
 		}
 
-		private void InitializeConfiguredParameters(IGitModule gitModule)
+		public void InitializeConfiguredParameters(IGitModule gitModule)
 		{
 			var firstRemoteName = gitModule.GetRemoteNames().FirstOrDefault();
 			var url = gitModule.GetSetting(string.Format(SettingKeyString.RemoteUrl, firstRemoteName));
@@ -263,11 +263,6 @@
 			//	}
 			//});
 			return LoggedIn;
-		}
-
-		private void LoginForm_LoggedIn(object sender, LoginForm.LoggedInEventArgs e)
-		{
-			Register(e.GitUICommands);
 		}
 	}
 }

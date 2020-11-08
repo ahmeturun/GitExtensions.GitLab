@@ -1,19 +1,29 @@
 ﻿namespace GitExtensions.GitLab.Forms
 {
 	using GitUI;
-	using GitUIPluginInterfaces;
 	using Microsoft.VisualStudio.Threading;
 	using System;
 	using System.Threading.Tasks;
+	using System.Windows.Forms;
 
 	public partial class LoginForm : GitExtensionsForm
 	{
 		private readonly JoinableTaskFactory joinableTaskFactory;
 		public LoginForm()
 		{
+			GitLabPlugin.Instance.LoggedIn = false;
 			joinableTaskFactory = new JoinableTaskContext().Factory;
 			InitializeComponent();
 			InitializeComplete();
+		}
+
+		protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+		{
+			if(keyData == Keys.Enter)
+			{
+				loginButtonClick(null, null);
+			}
+			return base.ProcessCmdKey(ref msg, keyData);
 		}
 
 		private void loginButtonClick(object sender, EventArgs e)
@@ -27,6 +37,7 @@
 					GitLabPlugin.Instance.OAuthToken.Name,
 					loginResult.AccessToken);
 				GitLabPlugin.Instance.LoggedIn = true;
+				GitLabPlugin.Instance.GitLabClient.UpdateAuthToken(loginResult.AccessToken);
 				loadingControl1.Visible = false;
 				Close();
 
@@ -39,6 +50,7 @@
 
 		private void LoginError(Exception e)
 		{
+			GitLabPlugin.Instance.LoggedIn = false;
 			Close();
 			using (var mergeRequestformStatus = new MergeRequsetFormStatus(
 						$"GitLab Plugin - Login Error",
@@ -48,16 +60,6 @@
 						e.Message))
 			{
 				mergeRequestformStatus.ShowDialog();
-			}
-		}
-		public sealed class LoggedInEventArgs : EventArgs
-		{
-			public IGitUICommands GitUICommands { get; }
-
-
-			public LoggedInEventArgs(IGitUICommands gitUICommands)
-			{
-				GitUICommands = gitUICommands;
 			}
 		}
 	}

@@ -25,6 +25,14 @@
 			client.AddDefaultHeader(HttpRequestHeader.Authorization.ToString(), $"{AuthenticationSchema} {oAuthToken}");
 		}
 
+		public void UpdateAuthToken(string authToken)
+		{
+			client.RemoveDefaultParameter(HttpRequestHeader.Authorization.ToString());
+			client.AddDefaultHeader(
+				HttpRequestHeader.Authorization.ToString(), 
+				$"{AuthenticationSchema} {authToken}");
+		}
+
 		public LoginResult Login(
 			string userName,
 			string password)
